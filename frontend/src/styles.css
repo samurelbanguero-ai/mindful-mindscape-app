@@ -1,0 +1,538 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
+}
+
+/* Default theme — Calma (soft teal/sage) */
+:root {
+  --radius: 1rem;
+  --background: oklch(0.985 0.012 175);
+  --foreground: oklch(0.22 0.04 200);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.04 200);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.04 200);
+  --primary: oklch(0.58 0.09 190);
+  --primary-foreground: oklch(0.99 0.01 180);
+  --secondary: oklch(0.94 0.03 175);
+  --secondary-foreground: oklch(0.28 0.05 200);
+  --muted: oklch(0.95 0.02 180);
+  --muted-foreground: oklch(0.48 0.03 200);
+  --accent: oklch(0.86 0.07 165);
+  --accent-foreground: oklch(0.25 0.05 200);
+  --destructive: oklch(0.6 0.2 25);
+  --destructive-foreground: oklch(0.99 0.01 180);
+  --border: oklch(0.9 0.02 180);
+  --input: oklch(0.92 0.02 180);
+  --ring: oklch(0.58 0.09 190);
+
+  --gradient-hero: linear-gradient(
+    135deg,
+    oklch(0.92 0.05 180) 0%,
+    oklch(0.88 0.07 165) 50%,
+    oklch(0.9 0.05 220) 100%
+  );
+  --gradient-soft: linear-gradient(180deg, var(--background), oklch(0.96 0.03 175));
+  --shadow-soft: 0 10px 40px -10px oklch(0.58 0.09 190 / 0.25);
+}
+
+/* Calma — sereno azul-verde (menta y salvia) */
+[data-mood="calma"] {
+  --background: oklch(0.97 0.025 180);
+  --foreground: oklch(0.22 0.04 180);
+  --card: oklch(0.99 0.005 180);
+  --primary: oklch(0.48 0.11 180);
+  --primary-foreground: oklch(0.99 0.01 180);
+  --secondary: oklch(0.93 0.04 180);
+  --accent: oklch(0.86 0.07 180);
+  --muted: oklch(0.95 0.02 180);
+  --muted-foreground: oklch(0.45 0.03 180);
+  --border: oklch(0.89 0.03 180);
+  --ring: oklch(0.48 0.11 180);
+  --gradient-soft: linear-gradient(
+    180deg,
+    var(--background),
+    oklch(0.94 0.04 180)
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    oklch(0.94 0.05 185) 0%,
+    oklch(0.88 0.08 175) 50%,
+    oklch(0.91 0.05 190) 100%
+  );
+}
+
+/* Alegría — cálido melocotón y coral soleado */
+[data-mood="alegria"] {
+  --background: oklch(0.965 0.045 80);
+  --foreground: oklch(0.25 0.06 65);
+  --card: oklch(0.992 0.01 80);
+  --primary: oklch(0.68 0.16 65);
+  --primary-foreground: oklch(0.99 0.01 80);
+  --secondary: oklch(0.92 0.07 75);
+  --accent: oklch(0.85 0.11 70);
+  --muted: oklch(0.95 0.03 80);
+  --muted-foreground: oklch(0.45 0.06 65);
+  --border: oklch(0.88 0.07 75);
+  --ring: oklch(0.68 0.16 65);
+  --gradient-soft: linear-gradient(
+    180deg,
+    var(--background),
+    oklch(0.93 0.07 80)
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    oklch(0.95 0.07 85) 0%,
+    oklch(0.89 0.11 60) 50%,
+    oklch(0.92 0.07 75) 100%
+  );
+}
+
+/* Tristeza — relajante azul lavanda e índigo */
+[data-mood="tristeza"] {
+  --background: oklch(0.955 0.035 245);
+  --foreground: oklch(0.24 0.06 250);
+  --card: oklch(0.985 0.01 245);
+  --primary: oklch(0.48 0.12 245);
+  --primary-foreground: oklch(0.99 0.005 245);
+  --secondary: oklch(0.90 0.06 240);
+  --accent: oklch(0.83 0.09 240);
+  --muted: oklch(0.93 0.03 245);
+  --muted-foreground: oklch(0.46 0.05 250);
+  --border: oklch(0.87 0.05 240);
+  --ring: oklch(0.48 0.12 245);
+  --gradient-soft: linear-gradient(
+    180deg,
+    var(--background),
+    oklch(0.92 0.05 240)
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    oklch(0.92 0.06 245) 0%,
+    oklch(0.85 0.09 250) 50%,
+    oklch(0.89 0.05 235) 100%
+  );
+}
+
+/* Ansiedad — místico amatista y lavanda */
+[data-mood="ansiedad"] {
+  --background: oklch(0.955 0.04 300);
+  --foreground: oklch(0.25 0.06 300);
+  --card: oklch(0.985 0.01 300);
+  --primary: oklch(0.52 0.13 300);
+  --primary-foreground: oklch(0.99 0.005 300);
+  --secondary: oklch(0.90 0.06 300);
+  --accent: oklch(0.83 0.1 295);
+  --muted: oklch(0.93 0.03 300);
+  --muted-foreground: oklch(0.46 0.05 300);
+  --border: oklch(0.87 0.05 300);
+  --ring: oklch(0.52 0.13 300);
+  --gradient-soft: linear-gradient(
+    180deg,
+    var(--background),
+    oklch(0.92 0.06 300)
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    oklch(0.92 0.06 305) 0%,
+    oklch(0.86 0.09 295) 50%,
+    oklch(0.89 0.05 315) 100%
+  );
+}
+
+/* Energía — vital coral y terracota rosa */
+[data-mood="energia"] {
+  --background: oklch(0.965 0.04 25);
+  --foreground: oklch(0.25 0.06 20);
+  --card: oklch(0.992 0.01 25);
+  --primary: oklch(0.56 0.16 28);
+  --primary-foreground: oklch(0.99 0.01 28);
+  --secondary: oklch(0.91 0.07 20);
+  --accent: oklch(0.84 0.11 25);
+  --muted: oklch(0.94 0.03 25);
+  --muted-foreground: oklch(0.45 0.06 20);
+  --border: oklch(0.88 0.06 20);
+  --ring: oklch(0.56 0.16 28);
+  --gradient-soft: linear-gradient(
+    180deg,
+    var(--background),
+    oklch(0.93 0.06 25)
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    oklch(0.93 0.06 30) 0%,
+    oklch(0.87 0.1 22) 50%,
+    oklch(0.9 0.07 45) 100%
+  );
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    font-family: var(--font-sans);
+  }
+  body {
+    background: var(--gradient-soft, var(--color-background));
+    color: var(--color-foreground);
+    min-height: 100vh;
+    transition:
+      background-color 0.5s ease,
+      color 0.5s ease;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Premium Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 9999px;
+  transition: background 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Micro-animaciones Premium */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s ease-in-out infinite;
+}
+
+/* Glassmorphism Premium */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Card Hover Premium */
+.card-hover-premium {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-hover-premium:hover {
+  transform: translateY(-4px) scale(1.005);
+  box-shadow: 0 20px 40px -10px oklch(from var(--primary) l c h / 0.12);
+}
+
+/* Focus glow para Inputs */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.15) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* Sistema de Componentes Visuales Premium Unificados */
+
+.card-premium {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem; /* rounded-2xl */
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px -2px oklch(0 0 0 / 0.03);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -4px oklch(from var(--primary) l c h / 0.08);
+  border-color: oklch(from var(--primary) l c h / 0.3);
+}
+
+.btn-premium-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  box-shadow: 0 4px 14px 0 oklch(from var(--primary) l c h / 0.25);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  border: none;
+}
+
+.btn-premium-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 oklch(from var(--primary) l c h / 0.35);
+  filter: brightness(1.05);
+}
+
+.btn-premium-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-premium-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-premium-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  background: var(--color-secondary);
+  color: var(--color-secondary-foreground);
+  border: 1px solid var(--color-border);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.btn-premium-secondary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: oklch(from var(--secondary) l c h / 0.85);
+  border-color: oklch(from var(--primary) l c h / 0.3);
+}
+
+.input-premium {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-foreground);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+/* Skeleton Loading Shimmer Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, 
+    var(--color-muted) 25%, 
+    oklch(from var(--muted) l c h / 1.5) 37%, 
+    var(--color-muted) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Estilos dinámicos para burbujas de conversación */
+.chat-bubble-user {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+  box-shadow: 0 4px 12px oklch(from var(--primary) l c h / 0.15);
+}
+
+.chat-bubble-assistant {
+  background: var(--color-card);
+  color: var(--color-foreground);
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+  box-shadow: 0 4px 12px oklch(0 0 0 / 0.02);
+}
+
+/* Modo oscuro unificado */
+.dark {
+  --background: oklch(0.12 0.015 220);
+  --foreground: oklch(0.9 0.01 220);
+  --card: oklch(0.16 0.02 220);
+  --card-foreground: oklch(0.9 0.01 220);
+  --border: oklch(0.24 0.02 220);
+  --input: oklch(0.2 0.02 220);
+  --muted: oklch(0.2 0.02 220);
+  --muted-foreground: oklch(0.65 0.015 220);
+  --popover: oklch(0.16 0.02 220);
+  --popover-foreground: oklch(0.9 0.01 220);
+}
+
+/* Sobrescribir variables de color si hay color personalizado activo (Temas Dinámicos oklch) */
+[data-custom-color-enabled="true"] {
+  --primary: var(--custom-primary) !important;
+  --ring: var(--custom-primary) !important;
+  
+  /* Paleta clara derivada dinámicamente */
+  --primary-foreground: oklch(from var(--custom-primary) 0.99 0.01 h) !important;
+  --background: oklch(from var(--custom-primary) 0.985 calc(c * 0.15) h) !important;
+  --foreground: oklch(from var(--custom-primary) 0.22 calc(c * 0.5) h) !important;
+  --secondary: oklch(from var(--custom-primary) 0.95 calc(c * 0.25) h) !important;
+  --accent: oklch(from var(--custom-primary) 0.88 calc(c * 0.4) h) !important;
+  --muted: oklch(from var(--custom-primary) 0.96 calc(c * 0.2) h) !important;
+  --muted-foreground: oklch(from var(--custom-primary) 0.45 calc(c * 0.3) h) !important;
+  --border: oklch(from var(--custom-primary) 0.91 calc(c * 0.2) h) !important;
+  
+  --gradient-soft: linear-gradient(
+    180deg, 
+    var(--background), 
+    oklch(from var(--custom-primary) 0.96 calc(c * 0.15) h)
+  ) !important;
+  
+  --gradient-hero: linear-gradient(
+    135deg,
+    oklch(from var(--custom-primary) 0.93 calc(c * 0.35) h) 0%,
+    oklch(from var(--custom-primary) 0.9 calc(c * 0.4) h) 50%,
+    oklch(from var(--custom-primary) 0.92 calc(c * 0.3) h) 100%
+  ) !important;
+}
+
+.dark[data-custom-color-enabled="true"],
+.dark [data-custom-color-enabled="true"] {
+  --primary: var(--custom-primary) !important;
+  --ring: var(--custom-primary) !important;
+  
+  /* Paleta oscura derivada dinámicamente */
+  --primary-foreground: oklch(from var(--custom-primary) 0.1 0.01 h) !important;
+  --background: oklch(from var(--custom-primary) 0.12 calc(c * 0.1) h) !important;
+  --foreground: oklch(from var(--custom-primary) 0.92 calc(c * 0.15) h) !important;
+  --secondary: oklch(from var(--custom-primary) 0.18 calc(c * 0.15) h) !important;
+  --accent: oklch(from var(--custom-primary) 0.25 calc(c * 0.2) h) !important;
+  --muted: oklch(from var(--custom-primary) 0.16 calc(c * 0.1) h) !important;
+  --muted-foreground: oklch(from var(--custom-primary) 0.65 calc(c * 0.15) h) !important;
+  --border: oklch(from var(--custom-primary) 0.22 calc(c * 0.15) h) !important;
+  
+  --gradient-soft: linear-gradient(
+    180deg, 
+    var(--background), 
+    oklch(from var(--custom-primary) 0.08 calc(c * 0.08) h)
+  ) !important;
+  
+  --gradient-hero: linear-gradient(
+    135deg,
+    oklch(from var(--custom-primary) 0.15 calc(c * 0.15) h) 0%,
+    oklch(from var(--custom-primary) 0.11 calc(c * 0.1) h) 50%,
+    oklch(from var(--custom-primary) 0.13 calc(c * 0.12) h) 100%
+  ) !important;
+}
+
+
+/* Animación suave para cambio de frase del día */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Animaciones del Centro de Bienestar */
+@keyframes breathingCircle {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px oklch(from var(--primary) l c h / 0.2);
+  }
+  50% {
+    transform: scale(1.3);
+    box-shadow: 0 0 40px oklch(from var(--primary) l c h / 0.5);
+  }
+}
+
+.animate-breathing {
+  animation: breathingCircle 8s ease-in-out infinite;
+}
+
+@keyframes bloom {
+  0% {
+    transform: scale(0) rotate(-15deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-bloom {
+  animation: bloom 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
