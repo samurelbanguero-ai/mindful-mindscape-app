@@ -1,0 +1,27 @@
+{
+  "modelo": "RandomForestRegressor",
+  "version": "1.0.0",
+  "features": [
+    "stress",
+    "panic_attacks",
+    "depression"
+  ],
+  "target": "anxiety",
+  "train_size": 183,
+  "test_size": 79,
+  "random_state": 42,
+  "hiperparametros": {
+    "n_estimators": 500,
+    "max_depth": 10
+  },
+  "metricas": {
+    "R2": 0.9057,
+    "MAE": 4.0629,
+    "RMSE": 5.4743
+  },
+  "dataset": "mental_health_spain_final.csv",
+  "rango_prediccion": {
+    "min": 29,
+    "max": 100
+  }
+}
