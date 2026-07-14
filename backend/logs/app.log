@@ -1143,3 +1143,19 @@
 [2026-07-13T22:10:39.359Z] [ERROR] Token inválido o expirado | Meta: {"url":"/api/support/request/me","method":"GET","statusCode":401,"stack":"Error: Token inválido o expirado\n    at authMiddleware (/app/middlewares/auth.middleware.js:25:17)\n    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)\n    at trim_prefix (/app/node_modules/express/lib/router/index.js:328:13)\n    at /app/node_modules/express/lib/router/index.js:286:9\n    at Function.process_params (/app/node_modules/express/lib/router/index.js:346:12)\n    at next (/app/node_modules/express/lib/router/index.js:280:10)\n    at Function.handle (/app/node_modules/express/lib/router/index.js:175:3)\n    at router (/app/node_modules/express/lib/router/index.js:47:12)\n    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)\n    at trim_prefix (/app/node_modules/express/lib/router/index.js:328:13)","user":null}
 [2026-07-13T22:34:06.199Z] [INFO] Limpieza automática de base de datos ejecutada con éxito | Meta: {"deletedOtps":0,"deletedResets":0,"deletedRefreshTokens":0}
 [2026-07-13T23:04:06.141Z] [INFO] Limpieza automática de base de datos ejecutada con éxito | Meta: {"deletedOtps":0,"deletedResets":0,"deletedRefreshTokens":0}
+[2026-07-14T00:54:53.142Z] [INFO] Limpieza automática de base de datos ejecutada con éxito | Meta: {"deletedOtps":0,"deletedResets":0,"deletedRefreshTokens":0}
+[2026-07-14T16:08:41.781Z] [INFO] Conexión exitosa a la base de datos: /app/database.sqlite
+[2026-07-14T16:08:42.770Z] [WARN] SMTP no está completamente configurado en las variables de entorno. Los correos se simularán imprimiendo en los logs en consola.
+[2026-07-14T16:08:45.747Z] [INFO] Tablas e índices de base de datos validados.
+[2026-07-14T16:08:45.940Z] [INFO] Usuario administrador actualizado en la base de datos.
+[2026-07-14T16:08:45.946Z] [INFO] Base de datos inicializada exitosamente.
+[2026-07-14T16:08:45.977Z] [INFO] ✅ Servidor de producción corriendo en http://localhost:3000
+[2026-07-14T16:08:45.981Z] [INFO] 🔑 API Key de Anthropic: configurada
+[2026-07-14T16:08:50.155Z] [INFO] Conexión exitosa a la base de datos: /app/database.sqlite
+[2026-07-14T16:08:50.510Z] [WARN] SMTP no está completamente configurado en las variables de entorno. Los correos se simularán imprimiendo en los logs en consola.
+[2026-07-14T16:08:50.973Z] [INFO] Tablas e índices de base de datos validados.
+[2026-07-14T16:08:51.136Z] [INFO] Usuario administrador actualizado en la base de datos.
+[2026-07-14T16:08:51.142Z] [INFO] Base de datos inicializada exitosamente.
+[2026-07-14T16:08:51.166Z] [INFO] ✅ Servidor de producción corriendo en http://localhost:3000
+[2026-07-14T16:08:51.175Z] [INFO] 🔑 API Key de Anthropic: configurada
+[2026-07-14T16:38:51.180Z] [INFO] Limpieza automática de base de datos ejecutada con éxito | Meta: {"deletedOtps":0,"deletedResets":0,"deletedRefreshTokens":0}
