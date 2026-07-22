@@ -91,8 +91,21 @@ export function Panel() {
       toast.error("El nombre de usuario debe tener al menos 3 caracteres");
       return;
     }
-    if (createPassword.length < 6) {
-      toast.error("La contraseña debe tener al menos 6 caracteres");
+    // Validar contraseña: mínimo 8 caracteres + mayúsculas + minúsculas + números
+    if (createPassword.length < 8) {
+      toast.error("La contraseña debe tener al menos 8 caracteres");
+      return;
+    }
+    if (!/[a-z]/.test(createPassword)) {
+      toast.error("La contraseña debe contener al menos una letra minúscula");
+      return;
+    }
+    if (!/[A-Z]/.test(createPassword)) {
+      toast.error("La contraseña debe contener al menos una letra mayúscula");
+      return;
+    }
+    if (!/[0-9]/.test(createPassword)) {
+      toast.error("La contraseña debe contener al menos un número");
       return;
     }
 
@@ -143,7 +156,7 @@ export function Panel() {
         supportStatusFilter === "all" ? "" : supportStatusFilter,
         supportSearch,
       );
-      
+
       const flattened: SupportRequest[] = (res.requests || []).map((item: any) => ({
         ...item.request,
         messages: item.messages,
