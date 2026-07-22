@@ -5,7 +5,7 @@ const ValidationError = require('../exceptions/ValidationError');
 class AuthValidator {
   validatePassword(password) {
     if (!password || typeof password !== 'string') {
-      throw new ValidationError('La contraseña es requerida y debe ser texto.');
+      throw new ValidationError('La contraseña es requerida.');
     }
 
     if (password.length < 8) {
@@ -16,23 +16,20 @@ class AuthValidator {
       throw new ValidationError('La contraseña no debe exceder 128 caracteres.');
     }
 
-    if (!/[a-z]/.test(password)) {
-      throw new ValidationError('La contraseña debe contener al menos una letra minúscula.');
+    // Contar cuántos requisitos cumple
+    const hasLowercase = /[a-z]/.test(password);
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password);
+
+    // Requerir al menos 3 de los 4 requisitos
+    const requirementsMet = [hasLowercase, hasUppercase, hasNumber, hasSpecialChar].filter(Boolean).length;
+
+    if (requirementsMet < 3) {
+      throw new ValidationError('La contraseña debe contener al menos 3 de estos requisitos: minúsculas, mayúsculas, números o caracteres especiales.');
     }
 
-    if (!/[A-Z]/.test(password)) {
-      throw new ValidationError('La contraseña debe contener al menos una letra mayúscula.');
-    }
-
-    if (!/[0-9]/.test(password)) {
-      throw new ValidationError('La contraseña debe contener al menos un número.');
-    }
-
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-      throw new ValidationError('La contraseña debe contener al menos un carácter especial (!@#$%^&*()...). ');
-    }
-
-    // Validar contra caracteres prohibidos o espacios
+    // Validar contra espacios en blanco
     if (/\s/.test(password)) {
       throw new ValidationError('La contraseña no puede contener espacios en blanco.');
     }
