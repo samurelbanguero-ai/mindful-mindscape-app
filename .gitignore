@@ -129,3 +129,16 @@ docker-compose.override.yml
 # Optional
 # ==========================
 scratch/
+*.bbl
+# LaTeX
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.synctex.gz
+*.toc
