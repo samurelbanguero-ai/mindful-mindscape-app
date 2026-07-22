@@ -16,17 +16,21 @@ class AuthValidator {
       throw new ValidationError('La contraseña no debe exceder 128 caracteres.');
     }
 
-    // Contar cuántos requisitos cumple
+    // Validar requisitos: minúsculas, mayúsculas, números
     const hasLowercase = /[a-z]/.test(password);
     const hasUppercase = /[A-Z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password);
 
-    // Requerir al menos 3 de los 4 requisitos
-    const requirementsMet = [hasLowercase, hasUppercase, hasNumber, hasSpecialChar].filter(Boolean).length;
+    if (!hasLowercase) {
+      throw new ValidationError('La contraseña debe contener al menos una letra minúscula.');
+    }
 
-    if (requirementsMet < 3) {
-      throw new ValidationError('La contraseña debe contener al menos 3 de estos requisitos: minúsculas, mayúsculas, números o caracteres especiales.');
+    if (!hasUppercase) {
+      throw new ValidationError('La contraseña debe contener al menos una letra mayúscula.');
+    }
+
+    if (!hasNumber) {
+      throw new ValidationError('La contraseña debe contener al menos un número.');
     }
 
     // Validar contra espacios en blanco

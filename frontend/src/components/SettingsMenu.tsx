@@ -72,7 +72,13 @@ export default function SettingsMenu() {
     e.preventDefault();
     if (!newUsername.trim()) return toast.error("El nombre de usuario es obligatorio");
     if (newUsername.trim().length < 3) return toast.error("El nombre de usuario debe tener mínimo 3 caracteres");
-    if (newPassword && newPassword.length < 6) return toast.error("La contraseña debe tener mínimo 6 caracteres");
+    if (newPassword) {
+      // Validar contraseña: mínimo 8 caracteres + mayúsculas + minúsculas + números
+      if (newPassword.length < 8) return toast.error("La contraseña debe tener al menos 8 caracteres");
+      if (!/[a-z]/.test(newPassword)) return toast.error("La contraseña debe contener al menos una letra minúscula");
+      if (!/[A-Z]/.test(newPassword)) return toast.error("La contraseña debe contener al menos una letra mayúscula");
+      if (!/[0-9]/.test(newPassword)) return toast.error("La contraseña debe contener al menos un número");
+    }
 
     setSaving(true);
     try {

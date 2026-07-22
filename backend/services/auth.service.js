@@ -113,7 +113,7 @@ class AuthService {
     authValidator.validateRegister(data);
 
     const { email, username, password, name = '', role = 'usuario' } = data;
-    
+
     const validRoles = ['usuario', 'psicologo'];
     if (!validRoles.includes(role)) {
       throw new ValidationError('Rol de usuario inválido');
@@ -477,10 +477,7 @@ class AuthService {
     }
 
     // Validar fortaleza de la nueva contraseña
-    const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_])[A-Za-z\d@$!%*?&_]{8,}$/;
-    if (!passwordStrengthRegex.test(password)) {
-      throw new ValidationError('La contraseña debe tener mínimo 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial.');
-    }
+    authValidator.validatePassword(password);
 
     // Hashing y actualización
     const rounds = Number(process.env.BCRYPT_ROUNDS) || 10;

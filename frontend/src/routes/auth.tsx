@@ -207,7 +207,7 @@ function ResetPasswordForm({
               type={showPw ? "text" : "password"}
               value={passwordVal}
               onChange={(e) => onChangePassword(e.target.value)}
-              placeholder="Mínimo 8 chars, 1 Mayus, 1 Núm, 1 Símb"
+              placeholder="Mínimo 8 chars, 1 Mayús, 1 Mín, 1 Núm"
               autoComplete="new-password"
               className="pr-10"
               aria-required="true"
@@ -326,7 +326,7 @@ function Auth() {
       });
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
-      
+
       if (errMsg.includes("verificar") || errMsg.includes("OTP")) {
         const matchingAcc = loadLocalAccount(li.id.trim());
         setOtpEmail(matchingAcc ? matchingAcc.email : li.id.trim());
@@ -365,9 +365,18 @@ function Auth() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rg.email)) {
       return toast.error("Formato de email inválido");
     }
-    const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_])[A-Za-z\d@$!%*?&_]{8,}$/;
-    if (!passwordStrengthRegex.test(rg.password)) {
-      return toast.error("La contraseña debe tener al menos 8 caracteres, mayúscula, minúscula, número y símbolo (@$!%*?&_).");
+    // Validar contraseña: mínimo 8 caracteres + mayúsculas + minúsculas + números
+    if (rg.password.length < 8) {
+      return toast.error("La contraseña debe tener al menos 8 caracteres.");
+    }
+    if (!/[a-z]/.test(rg.password)) {
+      return toast.error("La contraseña debe contener al menos una letra minúscula.");
+    }
+    if (!/[A-Z]/.test(rg.password)) {
+      return toast.error("La contraseña debe contener al menos una letra mayúscula.");
+    }
+    if (!/[0-9]/.test(rg.password)) {
+      return toast.error("La contraseña debe contener al menos un número.");
     }
     if (rg.visibility === "alias" && !rg.alias.trim()) {
       return toast.error("Escribe tu alias");
@@ -464,9 +473,18 @@ function Auth() {
       return toast.error("Las contraseñas no coinciden");
     }
 
-    const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_])[A-Za-z\d@$!%*?&_]{8,}$/;
-    if (!passwordStrengthRegex.test(resetPasswordVal)) {
-      return toast.error("La contraseña debe tener mínimo 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial.");
+    // Validar contraseña: mínimo 8 caracteres + mayúsculas + minúsculas + números
+    if (resetPasswordVal.length < 8) {
+      return toast.error("La contraseña debe tener al menos 8 caracteres.");
+    }
+    if (!/[a-z]/.test(resetPasswordVal)) {
+      return toast.error("La contraseña debe contener al menos una letra minúscula.");
+    }
+    if (!/[A-Z]/.test(resetPasswordVal)) {
+      return toast.error("La contraseña debe contener al menos una letra mayúscula.");
+    }
+    if (!/[0-9]/.test(resetPasswordVal)) {
+      return toast.error("La contraseña debe contener al menos un número.");
     }
 
     setLoading(true);
@@ -627,7 +645,7 @@ function Auth() {
                         value={rg.password}
                         onChange={(e) => setRg({ ...rg, password: e.target.value })}
                         autoComplete="new-password"
-                        placeholder="Mínimo 8 chars, 1 Mayus, 1 Núm, 1 Símb"
+                        placeholder="Mínimo 8 chars, 1 Mayús, 1 Mín, 1 Núm"
                         className="pr-10"
                       />
                       <button
