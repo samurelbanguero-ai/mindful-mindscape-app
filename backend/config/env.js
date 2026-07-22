@@ -1,16 +1,20 @@
 require('dotenv').config();
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  console.error('FATAL: JWT_SECRET no está definido en las variables de entorno.');
-  process.exit(1);
+const crypto = require('crypto');
+
+let JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET || JWT_SECRET === 'dev_jwt_secret_change_me') {
+  JWT_SECRET = crypto.randomBytes(64).toString('hex');
+  console.warn('⚠️ ADVERTENCIA: Usando JWT_SECRET autogenerado aleatoriamente por seguridad, ya que no se configuró uno seguro.');
 }
 
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
-if (!JWT_REFRESH_SECRET) {
-  console.error('FATAL: JWT_REFRESH_SECRET no está definido en las variables de entorno.');
-  process.exit(1);
+let JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+if (!JWT_REFRESH_SECRET || JWT_REFRESH_SECRET.includes('samuelbanguero')) {
+  JWT_REFRESH_SECRET = crypto.randomBytes(64).toString('hex');
+  console.warn('⚠️ ADVERTENCIA: Usando JWT_REFRESH_SECRET autogenerado aleatoriamente por seguridad, ya que el anterior era débil o estaba expuesto.');
 }
+
+
 
 module.exports = {
   PORT: process.env.PORT || 3000,

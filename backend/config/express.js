@@ -11,9 +11,9 @@ function configureExpress(app) {
   // Inyectar CORS
   app.use(cors(corsConfig));
 
-  // Parseadores de payloads JSON y URL encoded
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  // Parseadores de payloads JSON y URL encoded con límites de tamaño estrictos (mitigación DoS)
+  app.use(express.json({ limit: '50kb' }));
+  app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 
   // Parser de Cookies nativo ligero para soportar Refresh Token seguro sin dependencias extra
   app.use((req, res, next) => {

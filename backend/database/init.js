@@ -53,12 +53,19 @@ function seedAdminUser() {
   try {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@emowave.app';
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    let adminPassword = process.env.ADMIN_PASSWORD;
     const adminName = process.env.ADMIN_NAME || 'Administrador';
 
     if (!adminPassword) {
       logger.warn('ADMIN_PASSWORD no definido en .env — el administrador no se sembrará automáticamente.');
       return;
+    }
+
+    if (adminPassword.length < 8 || adminPassword === '123456' || adminPassword === 'admin') {
+      const crypto = require('crypto');
+      const generatedPassword = crypto.randomBytes(12).toString('base64url');
+      logger.warn(`⚠️ ADVERTENCIA DE SEGURIDAD: La contraseña de administrador en .env es demasiado corta o insegura. Por seguridad, se ha generado una contraseña aleatoria de un solo uso para esta sesión: ${generatedPassword}`);
+      adminPassword = generatedPassword;
     }
 
     const adminRecord = db.prepare(
