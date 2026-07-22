@@ -8,6 +8,7 @@ const resendVerificationRateLimitMap = new Map();
 const recoverPasswordRateLimitMap = new Map();
 const chatRateLimitMap = new Map();
 const helpbotRateLimitMap = new Map();
+const apiRateLimitMap = new Map();
 
 function createRateLimiter(map, limits, getClientKey) {
   return (req, res, next) => {
@@ -79,6 +80,12 @@ const helpbotRateLimit = createRateLimiter(
   getIpKey
 );
 
+const apiRateLimit = createRateLimiter(
+  apiRateLimitMap,
+  config.rateLimits.api,
+  getIpKey
+);
+
 module.exports = {
   authRateLimit,
   loginRateLimit,
@@ -87,5 +94,6 @@ module.exports = {
   resendVerificationRateLimit,
   recoverPasswordRateLimit,
   chatRateLimit,
-  helpbotRateLimit
+  helpbotRateLimit,
+  apiRateLimit
 };

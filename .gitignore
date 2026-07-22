@@ -1,0 +1,131 @@
+# ==========================
+# Dependencies
+# ==========================
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Yarn / pnpm (ignóralos solo si NO los usas)
+.pnp
+.pnp.js
+
+# ==========================
+# Environment variables
+# ==========================
+.env
+.env.local
+.env.*.local
+.env.production.local
+.env.development.local
+.env.test.local
+
+# ==========================
+# Secrets & Keys
+# ==========================
+*.pem
+*.key
+*.p12
+*.crt
+
+# ==========================
+# Logs
+# ==========================
+logs/
+backend/logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==========================
+# Build artifacts
+# ==========================
+dist/
+build/
+frontend/dist/
+backend/dist/
+.next/
+out/
+.vite/
+frontend/.vite/
+*.tsbuildinfo
+
+# ==========================
+# Coverage
+# ==========================
+coverage/
+.nyc_output/
+htmlcov/
+.coverage
+
+# ==========================
+# Runtime
+# ==========================
+tmp/
+temp/
+*.pid
+*.seed
+*.pid.lock
+
+# ==========================
+# Database
+# ==========================
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================
+# Python
+# ==========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+.pytest_cache/
+.tox/
+
+# ==========================
+# IDE & Editor
+# ==========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+.c9/
+*.launch
+*.sublime-project
+*.sublime-workspace
+
+# ==========================
+# OS Files
+# ==========================
+.DS_Store
+Thumbs.db
+
+# ==========================
+# Docker
+# ==========================
+docker-compose.override.yml
+
+# ==========================
+# Archives
+# ==========================
+*.zip
+*.tar
+*.gz
+
+# ==========================
+# Optional
+# ==========================
+scratch/

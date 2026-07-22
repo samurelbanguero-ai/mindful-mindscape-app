@@ -1,6 +1,24 @@
 module.exports = {
-  helmetOptions: {},
+  helmetOptions: {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'none'"],
+        frameAncestors: ["'none'"], // Previene Clickjacking
+        sandbox: ['allow-forms', 'allow-scripts']
+      }
+    },
+    frameguard: { action: 'deny' }, // Previene Clickjacking
+    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }, // HTTPS forzado
+    noSniff: true, // Evita sniffing de tipos mime
+    xssFilter: true, // XSS Auditor habilitado
+    hidePoweredBy: true // Oculta cabecera X-Powered-By
+  },
   rateLimits: {
+    api: {
+      windowMs: 15 * 60 * 1000, // 15 minutos
+      max: 200,
+      message: 'Demasiadas peticiones. Por favor, intenta de nuevo en 15 minutos.'
+    },
     auth: {
       windowMs: 15 * 60 * 1000, // 15 minutos
       max: 15,

@@ -3,6 +3,41 @@ const { VALID_ROLES, VALID_VISIBILITIES } = require('../shared/constants');
 const ValidationError = require('../exceptions/ValidationError');
 
 class AuthValidator {
+  validatePassword(password) {
+    if (!password || typeof password !== 'string') {
+      throw new ValidationError('La contraseña es requerida y debe ser texto.');
+    }
+
+    if (password.length < 8) {
+      throw new ValidationError('La contraseña debe tener al menos 8 caracteres.');
+    }
+
+    if (password.length > 128) {
+      throw new ValidationError('La contraseña no debe exceder 128 caracteres.');
+    }
+
+    if (!/[a-z]/.test(password)) {
+      throw new ValidationError('La contraseña debe contener al menos una letra minúscula.');
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      throw new ValidationError('La contraseña debe contener al menos una letra mayúscula.');
+    }
+
+    if (!/[0-9]/.test(password)) {
+      throw new ValidationError('La contraseña debe contener al menos un número.');
+    }
+
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      throw new ValidationError('La contraseña debe contener al menos un carácter especial (!@#$%^&*()...). ');
+    }
+
+    // Validar contra caracteres prohibidos o espacios
+    if (/\s/.test(password)) {
+      throw new ValidationError('La contraseña no puede contener espacios en blanco.');
+    }
+  }
+
   validateRegister(data) {
     const { email = '', username = '', password = '', role = 'usuario', visibility = 'publico' } = data;
 
@@ -18,9 +53,7 @@ class AuthValidator {
       throw new ValidationError('El nombre de usuario debe tener entre 3 y 30 caracteres alfanuméricos, guiones bajos o puntos.');
     }
 
-    if (password.length < 6 || password.length > 100) {
-      throw new ValidationError('La contraseña debe tener entre 6 y 100 caracteres.');
-    }
+    this.validatePassword(password);
 
     if (!VALID_ROLES.includes(role)) {
       throw new ValidationError('Rol inválido');
