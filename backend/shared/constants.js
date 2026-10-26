@@ -1,4 +1,5 @@
 module.exports = {
+  // Roles que un administrador puede asignar al crear una cuenta ('usuario' = estudiante)
   VALID_ROLES: ['usuario', 'psicologo'],
   VALID_VISIBILITIES: ['publico', 'alias', 'anonimo'],
   VALID_REACTIONS: ['❤️', '🌻', '🤗', '💪', '😢', '🌈'],

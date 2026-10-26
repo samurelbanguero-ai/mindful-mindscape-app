@@ -286,7 +286,6 @@ function Auth() {
     email: "",
     username: "",
     password: "",
-    role: "usuario" as Role,
     visibility: "publico" as Visibility,
     alias: "",
   });
@@ -390,7 +389,6 @@ function Auth() {
         rg.username.trim(),
         rg.password,
         rg.username.trim(),
-        rg.role,
         rg.visibility,
         rg.alias.trim(),
       );
@@ -398,7 +396,7 @@ function Auth() {
       saveLocalAccount({
         username: rg.username.trim(),
         email: rg.email.trim(),
-        role: rg.role,
+        role: "usuario",
         visibility: rg.visibility,
         alias: rg.alias.trim(),
       });

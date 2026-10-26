@@ -1,5 +1,5 @@
 const { EMAIL_REGEX, USERNAME_REGEX } = require('../shared/regex');
-const { VALID_ROLES, VALID_VISIBILITIES } = require('../shared/constants');
+const { VALID_VISIBILITIES } = require('../shared/constants');
 const ValidationError = require('../exceptions/ValidationError');
 
 class AuthValidator {
@@ -40,7 +40,7 @@ class AuthValidator {
   }
 
   validateRegister(data) {
-    const { email = '', username = '', password = '', role = 'usuario', visibility = 'publico' } = data;
+    const { email = '', username = '', password = '', visibility = 'publico' } = data;
 
     if (!email.trim() || !username.trim() || !password) {
       throw new ValidationError('Email, username y password son requeridos');
@@ -55,10 +55,6 @@ class AuthValidator {
     }
 
     this.validatePassword(password);
-
-    if (!VALID_ROLES.includes(role)) {
-      throw new ValidationError('Rol inválido');
-    }
 
     if (!VALID_VISIBILITIES.includes(visibility)) {
       throw new ValidationError('Tipo de visibilidad inválido');

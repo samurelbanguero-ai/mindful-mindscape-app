@@ -646,7 +646,7 @@ export function Panel() {
               <Card className="max-w-xl mx-auto p-6 card-premium shadow bg-card space-y-6">
                 <div>
                   <h3 className="text-lg font-serif font-semibold text-foreground/90">Crear nueva cuenta</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Introduce los datos para dar de alta a un nuevo psicólogo o usuario.</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Introduce los datos para dar de alta a un nuevo psicólogo o estudiante.</p>
                 </div>
 
                 <form onSubmit={handleCreateUser} className="space-y-4 text-xs">
@@ -709,7 +709,7 @@ export function Panel() {
                       onChange={(e) => setCreateRole(e.target.value as "usuario" | "psicologo")}
                       className="w-full px-3 py-2 rounded-xl border border-border text-xs bg-background input-premium"
                     >
-                      <option value="usuario">Usuario común</option>
+                      <option value="usuario">Estudiante</option>
                       <option value="psicologo">Psicólogo/a del equipo</option>
                     </select>
                   </div>

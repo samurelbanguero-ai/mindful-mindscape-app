@@ -13,12 +13,16 @@ const UnauthorizedError = require('../exceptions/UnauthorizedError');
 const AppError = require('../exceptions/AppError');
 const { sanitizeText } = require('../utils/sanitizer');
 const { compareConstantTime, hashValue } = require('../shared/helpers');
+const { VALID_ROLES } = require('../shared/constants');
 
 class AuthService {
   async register(data, ip = '', userAgent = '') {
     authValidator.validateRegister(data);
 
-    const { email, username, password, name = '', role = 'usuario', visibility = 'publico', alias = '' } = data;
+    // El rol nunca se toma de la petición: todo registro público es de estudiante.
+    // Solo un administrador puede crear cuentas de psicólogo (createPsychologist / createUserAdmin).
+    const role = 'usuario';
+    const { email, username, password, name = '', visibility = 'publico', alias = '' } = data;
     const cleanEmail = email.trim().toLowerCase();
     const cleanUsername = username.trim();
 
@@ -114,8 +118,7 @@ class AuthService {
 
     const { email, username, password, name = '', role = 'usuario' } = data;
 
-    const validRoles = ['usuario', 'psicologo'];
-    if (!validRoles.includes(role)) {
+    if (!VALID_ROLES.includes(role)) {
       throw new ValidationError('Rol de usuario inválido');
     }
 

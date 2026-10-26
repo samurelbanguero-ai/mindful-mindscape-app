@@ -123,18 +123,18 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}): P
 // AUTH API
 // ─────────────────────────────────────────────
 export const auth = {
+  // El rol no se envía: todo registro público es de estudiante (el backend lo fija)
   register: (
     email: string,
     username: string,
     password: string,
     name = "",
-    role = "usuario",
     visibility = "publico",
     alias = "",
   ) =>
     apiRequest("/auth/register", {
       method: "POST",
-      body: JSON.stringify({ email, username, password, name, role, visibility, alias }),
+      body: JSON.stringify({ email, username, password, name, visibility, alias }),
     }),
 
   login: (email: string, password: string) =>
