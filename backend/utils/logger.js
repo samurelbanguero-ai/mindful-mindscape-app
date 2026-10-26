@@ -1,7 +1,7 @@
-const fs = require('fs');
 const path = require('path');
 
 const { LOGS_DIR: logsDir } = require('../config/paths');
+const { appendWithRotation } = require('./log-rotation');
 
 const paths = {
   app: path.join(logsDir, 'app.log'),
@@ -27,9 +27,9 @@ function writeToFile(fileKey, level, message, meta) {
     console.log(logMessage.trim());
   }
 
-  // Escribir en archivo correspondiente de forma asíncrona pero segura
+  // Escribir en el archivo correspondiente, rotándolo al superar 5 MB (se conservan 5 copias)
   try {
-    fs.appendFileSync(paths[fileKey], logMessage, 'utf8');
+    appendWithRotation(paths[fileKey], logMessage);
   } catch (err) {
     console.error(`Error al escribir log en ${fileKey}:`, err);
   }
