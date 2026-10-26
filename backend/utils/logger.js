@@ -1,12 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const logsDir = path.join(__dirname, '..', 'logs');
-
-// Asegurar que el directorio de logs exista de forma nativa
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
-}
+const { LOGS_DIR: logsDir } = require('../config/paths');
 
 const paths = {
   app: path.join(logsDir, 'app.log'),
