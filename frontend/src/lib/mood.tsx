@@ -153,7 +153,7 @@ export const MOODS: {
     description: "No tengo claro qué siento",
     score: 3,
     category: "neutra",
-    parentMood: "calma",
+    parentMood: "ansiedad",
   },
   {
     id: "aburrimiento",
@@ -218,7 +218,7 @@ export const MOODS: {
     description: "Impotencia ante algo",
     score: 2,
     category: "negativa",
-    parentMood: "tristeza",
+    parentMood: "energia",
   },
   {
     id: "enojo",
@@ -227,7 +227,7 @@ export const MOODS: {
     description: "Molesto/a o furioso/a",
     score: 1,
     category: "negativa",
-    parentMood: "tristeza",
+    parentMood: "energia",
   },
   {
     id: "soledad",
@@ -488,7 +488,7 @@ export function MoodProvider({ children }: { children: ReactNode }) {
           }
 
           if (meRes.user.profile_data) {
-            setProfileState(meRes.user.profile_data);
+            setProfileState({ ...DEFAULT_PROFILE, ...meRes.user.profile_data });
           }
         } else {
           setUser(null);
@@ -645,7 +645,7 @@ export function MoodProvider({ children }: { children: ReactNode }) {
       }).catch((e) => console.warn("No se pudieron cargar posts tras login", e));
 
       if (u.profile_data) {
-        setProfileState(u.profile_data);
+        setProfileState({ ...DEFAULT_PROFILE, ...u.profile_data });
       }
     }
     try {

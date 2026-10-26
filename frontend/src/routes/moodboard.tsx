@@ -63,7 +63,7 @@ const FONTS = [
 ];
 
 function MoodboardView() {
-  const { user } = useMood();
+  const { user, authReady } = useMood();
   const navigate = useNavigate();
   const [notes, setNotes] = useState<BoardNote[]>([]);
   const [text, setText] = useState("");
@@ -73,6 +73,7 @@ function MoodboardView() {
   const [editId, setEditId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!authReady) return;
     if (!user) {
       navigate({ to: "/auth" });
       return;
@@ -85,7 +86,7 @@ function MoodboardView() {
         void e;
       }
     }
-  }, [user, navigate]);
+  }, [authReady, user, navigate]);
 
   const saveNotes = (next: BoardNote[]) => {
     setNotes(next);
@@ -143,7 +144,7 @@ function MoodboardView() {
     toast.info("Nota eliminada");
   };
 
-  if (!user) return null;
+  if (!authReady || !user) return null;
 
   return (
     <div>

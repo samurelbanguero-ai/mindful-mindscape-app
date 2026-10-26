@@ -44,7 +44,7 @@ interface ModerationPost {
 }
 
 export function Panel() {
-  const { user } = useMood();
+  const { user, authReady } = useMood();
   const navigate = useNavigate();
   const isAdmin = user?.role === "admin";
   const isPsico = user?.role === "psicologo" || isAdmin;
@@ -136,9 +136,10 @@ export function Panel() {
   const [loadingLogs, setLoadingLogs] = useState(false);
 
   useEffect(() => {
+    if (!authReady) return;
     if (!user) navigate({ to: "/auth" });
     else if (user.role !== "psicologo" && user.role !== "admin") navigate({ to: "/app" });
-  }, [user, navigate]);
+  }, [authReady, user, navigate]);
 
   // Auto-scroll al final del chat
   useEffect(() => {
@@ -334,7 +335,7 @@ export function Panel() {
     }));
   }, [requests]);
 
-  if (!user) return null;
+  if (!authReady || !user) return null;
 
   return (
     <div className="min-h-screen bg-background">

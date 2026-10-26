@@ -23,7 +23,7 @@ export const Route = createFileRoute("/comunidad")({
 });
 
 export function Comunidad() {
-  const { user, posts, addPost, react, addComment, reportPost } = useMood();
+  const { user, authReady, posts, addPost, react, addComment, reportPost } = useMood();
   const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
   const [activePost, setActivePost] = useState<Post | null>(null);
@@ -40,10 +40,10 @@ export function Comunidad() {
   const [commentAnon, setCommentAnon] = useState(false);
 
   useEffect(() => {
-    if (!user) navigate({ to: "/auth" });
-  }, [user, navigate]);
+    if (authReady && !user) navigate({ to: "/auth" });
+  }, [authReady, user, navigate]);
 
-  if (!user) return null;
+  if (!authReady || !user) return null;
 
   const handleCreatePost = (e: React.FormEvent) => {
     e.preventDefault();

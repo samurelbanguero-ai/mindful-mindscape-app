@@ -27,7 +27,7 @@ function SpotifyIcon({ className = "w-6 h-6", color = "#1DB954" }) {
 }
 
 function Spot() {
-  const { user, profile, mood, disconnectSpotify } = useMood();
+  const { user, authReady, profile, mood, disconnectSpotify } = useMood();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [playlists, setPlaylists] = useState<any[]>([]);
@@ -52,8 +52,8 @@ function Spot() {
   }, []);
 
   useEffect(() => {
-    if (!user) navigate({ to: "/auth" });
-  }, [user, navigate]);
+    if (authReady && !user) navigate({ to: "/auth" });
+  }, [authReady, user, navigate]);
 
   const parentMood = useMemo(() => {
     return getParentMood(mood) || "calma";
@@ -83,7 +83,7 @@ function Spot() {
     loadPlaylists();
   }, [profile.spotifyConnected, parentMood, user]);
 
-  if (!user) return null;
+  if (!authReady || !user) return null;
 
   const connect = async () => {
     let token = getToken();
@@ -129,14 +129,6 @@ function Spot() {
             <SpotifyIcon className="w-9 h-9" /> Spotify
           </h1>
         </div>
-
-        <Card className="p-3 rounded-2xl border-0 bg-accent/40 flex items-start gap-3 text-sm">
-          <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-          <p className="text-foreground/70">
-            Conexión oficial con la API de Spotify. Las recomendaciones se basan en tu emoción
-            actual.
-          </p>
-        </Card>
 
         {!profile.spotifyConnected ? (
           <Card className="card-premium text-center py-10">

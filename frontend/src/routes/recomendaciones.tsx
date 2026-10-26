@@ -68,11 +68,11 @@ const ACTIVITIES: Record<Mood, string[]> = {
 };
 
 function Recos() {
-  const { user, mood, profile, entries } = useMood();
+  const { user, authReady, mood, profile, entries } = useMood();
   const navigate = useNavigate();
   useEffect(() => {
-    if (!user) navigate({ to: "/auth" });
-  }, [user, navigate]);
+    if (authReady && !user) navigate({ to: "/auth" });
+  }, [authReady, user, navigate]);
 
   const todayMood = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -95,7 +95,7 @@ function Recos() {
   const moviesList = MOVIES[parentMood] || MOVIES.calma;
   const activitiesList = ACTIVITIES[parentMood] || ACTIVITIES.calma;
 
-  if (!user) return null;
+  if (!authReady || !user) return null;
 
   return (
     <div>

@@ -169,9 +169,11 @@ const PARENT_MOOD_DETAILS: Record<string, { bg: string; border: string; text: st
 function AppPage() {
   const {
     user,
+    authReady,
     entries,
     addEntry,
     mood,
+    setMood,
     streak,
     treeLevel,
     activeSupportRequest,
@@ -198,9 +200,12 @@ function AppPage() {
     setSelectedMood(mood);
   }, [mood]);
 
+  // Solo actualiza la selección local del formulario — el color global de la
+  // app no debe cambiar hasta que la emoción realmente se guarde (ver
+  // handleEntrySubmit), para que nunca quede un tema visual que no
+  // corresponda a algo que el usuario haya expresado de verdad.
   const handleMoodSelect = (newMood: Mood) => {
     setSelectedMood(newMood);
-    setMood(newMood);
   };
 
   // Chispa mental del día logic
@@ -355,8 +360,8 @@ function AppPage() {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!user) navigate({ to: "/auth" });
-  }, [user, navigate]);
+    if (authReady && !user) navigate({ to: "/auth" });
+  }, [authReady, user, navigate]);
 
   // Auto-scroll al final del chat
   useEffect(() => {
@@ -376,6 +381,8 @@ function AppPage() {
         situations,
         note: note.trim(),
       });
+      // La emoción quedó guardada de verdad: ahora sí refleja el color global.
+      setMood(selectedMood);
       setNote("");
       setSituations([]);
     } catch (_) {
@@ -465,7 +472,7 @@ function AppPage() {
     });
   }, [entries, chartRange]);
 
-  if (!user) return null;
+  if (!authReady || !user) return null;
 
   return (
     <div className="min-h-screen bg-background">

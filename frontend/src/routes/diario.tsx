@@ -17,7 +17,7 @@ const GREETING =
   "Hola. Este es tu diario privado. Cuéntame cómo te sientes hoy, sin filtros. Estoy aquí para escucharte.";
 
 function Diario() {
-  const { user } = useMood();
+  const { user, authReady } = useMood();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: GREETING },
@@ -26,13 +26,15 @@ function Diario() {
   const [typing, setTyping] = useState(false);
   // ✅ Controla si el backend IA está disponible (se detecta en el primer error)
   const [isOffline, setIsOffline] = useState(false);
+  // Distingue sesión vencida (requiere volver a iniciar sesión) de una falla real de conexión/IA
+  const [sessionExpired, setSessionExpired] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   // ✅ FIX: useRef para evitar inicialización doble en StrictMode
   const initialized = useRef(false);
 
   useEffect(() => {
-    if (!user) navigate({ to: "/auth" });
-  }, [user, navigate]);
+    if (authReady && !user) navigate({ to: "/auth" });
+  }, [authReady, user, navigate]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -49,6 +51,7 @@ function Diario() {
   const resetChat = useCallback(() => {
     setMessages([{ role: "assistant", content: GREETING }]);
     setIsOffline(false);
+    setSessionExpired(false);
     initialized.current = false;
   }, []);
 
@@ -69,22 +72,37 @@ function Diario() {
       const reply = res.reply?.trim() || "No pude responder en este momento.";
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       setIsOffline(false);
-    } catch {
-      setIsOffline(true);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "Parece que no me puedo conectar ahora mismo. Tu mensaje se registró. ¿Seguimos cuando haya conexión?",
-        },
-      ]);
+      setSessionExpired(false);
+    } catch (err) {
+      // Sesión vencida (ver refresco de token en lib/api.ts) es un caso distinto
+      // a un fallo real de conexión con el asistente — no deben confundirse.
+      const message = err instanceof Error ? err.message : "";
+      if (message.includes("Sesión expirada") || message.includes("Token")) {
+        setSessionExpired(true);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "Tu sesión expiró. Vuelve a iniciar sesión para seguir escribiendo aquí.",
+          },
+        ]);
+      } else {
+        setIsOffline(true);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content:
+              "Parece que no me puedo conectar ahora mismo. Tu mensaje se registró. ¿Seguimos cuando haya conexión?",
+          },
+        ]);
+      }
     } finally {
       setTyping(false);
     }
   };
 
-  if (!user) return null;
+  if (!authReady || !user) return null;
 
   return (
     <div>
@@ -105,8 +123,23 @@ function Diario() {
           </Button>
         </div>
 
+        {/* Sesión vencida: acción clara para recuperarla, distinta de un fallo de conexión */}
+        {sessionExpired && (
+          <Card className="p-3 rounded-2xl border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-800 flex items-center justify-between gap-3 text-sm">
+            <div className="flex items-start gap-3">
+              <span className="text-red-500 shrink-0 mt-0.5">🔒</span>
+              <p className="text-red-700 dark:text-red-300">
+                Tu sesión expiró. Vuelve a iniciar sesión para continuar.
+              </p>
+            </div>
+            <Button size="sm" className="rounded-full shrink-0" onClick={() => navigate({ to: "/auth" })}>
+              Iniciar sesión
+            </Button>
+          </Card>
+        )}
+
         {/* ✅ FIX: banner de modo offline SOLO si hay fallo real de conexión */}
-        {isOffline && (
+        {isOffline && !sessionExpired && (
           <Card className="p-3 rounded-2xl border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 flex items-start gap-3 text-sm">
             <span className="text-amber-500 shrink-0 mt-0.5">⚠️</span>
             <p className="text-amber-700 dark:text-amber-300">

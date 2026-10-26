@@ -42,13 +42,13 @@ export const Route = createFileRoute("/onboarding")({
 });
 
 function Onboarding() {
-  const { user, profile, setProfile } = useMood();
+  const { user, authReady, profile, setProfile } = useMood();
   const navigate = useNavigate();
   const [f, setF] = useState(profile);
 
   useEffect(() => {
-    if (!user) navigate({ to: "/auth" });
-  }, [user, navigate]);
+    if (authReady && !user) navigate({ to: "/auth" });
+  }, [authReady, user, navigate]);
 
   const toggle = (key: "interests" | "genres" | "relax", v: string) => {
     setF((p) => ({
@@ -63,7 +63,7 @@ function Onboarding() {
     navigate({ to: "/app" });
   };
 
-  if (!user) return null;
+  if (!authReady || !user) return null;
 
   return (
     <div>
