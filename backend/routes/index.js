@@ -8,6 +8,7 @@ const adminRoutes = require('./admin.routes');
 const spotifyRoutes = require('./spotify.routes');
 const supportRoutes = require('./support.routes');
 const assistantRoutes = require('./assistant.routes');
+const mlRoutes = require('./ml.routes');
 const monitoringRoutes = require('./monitoring.routes');
 
 const router = express.Router();
@@ -19,6 +20,7 @@ router.use('/diary', diaryRoutes);
 router.use('/community', postRoutes);
 router.use('/admin', adminRoutes);
 router.use('/support', supportRoutes);
+router.use('/ml', mlRoutes);
 
 // Rutas montadas directamente en /api para alineación y compatibilidad exacta
 router.use('/', spotifyRoutes);

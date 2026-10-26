@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useMood, MOODS, SITUATIONS, type Mood } from "@/lib/mood";
 import { EmotionChoice } from "@/components/EmotionChoice";
+import { AnxietyIndicator } from "@/components/AnxietyIndicator";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
 import {
@@ -689,6 +690,11 @@ function AppPage() {
                   )}
                 </div>
               </Card>
+
+              {/* Indicador del modelo de ML, recalculado cada vez que cambia el diario */}
+              {!offlineMode && (
+                <AnxietyIndicator refreshKey={entries} onRequestSupport={() => setIsSupportOpen(true)} />
+              )}
             </div>
           </div>
 

@@ -1,5 +1,6 @@
 const db = require('../database/connection');
 const env = require('../config/env');
+const mlClient = require('../integrations/ml/ml.client');
 
 function getHealthStatus() {
   let dbOk = false;
@@ -14,6 +15,7 @@ function getHealthStatus() {
     ok: dbOk,
     message: dbOk ? 'Backend funcionando correctamente' : 'Error en la base de datos',
     db: dbOk ? 'connected' : 'disconnected',
+    ml: mlClient.getStatus(),
     timestamp: new Date().toISOString()
   };
 }

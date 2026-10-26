@@ -5,6 +5,7 @@ const configureExpress = require('./config/express');
 const configureRoutes = require('./config/routes');
 const configureGlobalMiddlewares = require('./config/middlewares');
 const logger = require('./utils/logger');
+const mlClient = require('./integrations/ml/ml.client');
 
 const app = express();
 const PORT = env.PORT;
@@ -25,6 +26,11 @@ try {
   // 5. Iniciar la escucha del servidor
   app.listen(PORT, () => {
     logger.info(`✅ Servidor de producción corriendo en http://localhost:${PORT}`);
+  });
+
+  // 6. Precargar el modelo de ML en segundo plano (si falla, se reintenta en la primera petición)
+  mlClient.start().catch((err) => {
+    logger.warn(`Modelo de ML no disponible al arrancar: ${err.message}`);
   });
 
 } catch (err) {

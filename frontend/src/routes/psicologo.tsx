@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useMood } from "@/lib/mood";
+import { AnxietyIndicator } from "@/components/AnxietyIndicator";
 import { support as supportApi, admin as adminApi, community as communityApi, type SupportRequest, type AuditLog } from "@/lib/api";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { toast } from "sonner";
@@ -508,6 +509,10 @@ export function Panel() {
                         <span className="font-semibold block mb-0.5 text-primary">Motivo de consulta:</span>
                         {selectedReq.message}
                       </div>
+
+                      {selectedReq.share_journal === 1 && (
+                        <AnxietyIndicator requestId={selectedReq.id} refreshKey={selectedReq.journal_entries?.length} compact />
+                      )}
 
                       {selectedReq.share_journal === 1 && selectedReq.journal_entries && selectedReq.journal_entries.length > 0 && (
                         <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-3.5 text-xs space-y-2">

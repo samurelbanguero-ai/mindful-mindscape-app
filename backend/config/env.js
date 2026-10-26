@@ -25,6 +25,7 @@ module.exports = {
   SPOTIFY_REDIRECT_URI: process.env.SPOTIFY_REDIRECT_URI || 'http://localhost:3000/api/auth/spotify/callback',
   NODE_ENV: process.env.NODE_ENV || 'development',
   AI_MODE: process.env.AI_MODE || 'online',
+  ML_PYTHON: process.env.ML_PYTHON || 'python3',
   SMTP_HOST: process.env.SMTP_HOST,
   SMTP_PORT: process.env.SMTP_PORT,
   SMTP_USER: process.env.SMTP_USER,

@@ -387,3 +387,46 @@ export async function askAssistant(
     reply: typeof data?.reply === "string" ? data.reply : "",
   };
 }
+
+// ─────────────────────────────────────────────
+// MODELO DE ML — ESTIMACIÓN DE ANSIEDAD
+// ─────────────────────────────────────────────
+export type AnxietyFeatures = {
+  stress: number;
+  panic_attacks: number;
+  depression: number;
+};
+
+export type AnxietyPrediction = {
+  ansiedad_predicha: number;
+  nivel_riesgo: "bajo" | "moderado" | "alto" | "severo";
+  descripcion: string;
+  factores: AnxietyFeatures;
+  importancia_variables: AnxietyFeatures;
+  modelo: string;
+};
+
+export type AnxietyEstimate = {
+  available: boolean;
+  reason?: "insufficient_data";
+  entriesInWindow?: number;
+  entriesUsed?: number;
+  prediction?: AnxietyPrediction;
+  trend?: { direction: "sube" | "baja" | "estable"; delta: number; previousScore: number } | null;
+  window: { from: string; to: string; days: number; minEntries: number };
+  disclaimer: string;
+};
+
+// Fecha local (no UTC) para que la ventana coincida con las fechas del diario
+const localToday = (): string => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+export const ml = {
+  getMyAnxiety: (): Promise<AnxietyEstimate> => apiRequest(`/ml/anxiety?today=${localToday()}`),
+
+  getRequestAnxiety: (requestId: number | string): Promise<AnxietyEstimate> =>
+    apiRequest(`/ml/anxiety/request/${requestId}?today=${localToday()}`),
+};
