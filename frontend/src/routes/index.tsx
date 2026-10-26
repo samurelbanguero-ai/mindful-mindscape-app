@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { MOODS, useMood } from "@/lib/mood";
+import { EmotionChoice } from "@/components/EmotionChoice";
 import {
   BookHeart,
   Sparkles,
@@ -51,7 +52,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const { user, authReady, setMood } = useMood();
+  const { user, authReady, mood, setMood } = useMood();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -108,19 +109,25 @@ function Landing() {
             <p className="text-sm text-muted-foreground mb-3">¿Cómo te sientes ahora?</p>
             <div className="grid grid-cols-5 gap-2">
               {MOODS.map((m) => (
-                <button
+                <EmotionChoice
                   key={m.id}
-                  onClick={() => setMood(m.id)}
-                  className="aspect-square rounded-2xl bg-secondary hover:bg-accent transition flex flex-col items-center justify-center gap-1 active:scale-95"
-                  title={m.label}
+                  emotionId={m.id}
+                  selected={mood === m.id}
+                  onSelect={() => setMood(m.id)}
+                  className="w-full aspect-square rounded-2xl bg-secondary hover:bg-accent transition flex flex-col items-center justify-center gap-1 active:scale-95"
                 >
-                  <span className="text-2xl">{m.emoji}</span>
+                  <span className="text-2xl" aria-hidden="true">
+                    {m.emoji}
+                  </span>
                   <span className="text-[10px] text-muted-foreground">{m.label}</span>
-                </button>
+                </EmotionChoice>
               ))}
             </div>
             <p className="text-xs text-muted-foreground mt-4 text-center">
               Toca una emoción: la paleta cambia contigo 🌈
+              <br />
+              ¿No sabes cuál es? Mantén presionada o toca <span aria-hidden="true">ⓘ</span> para ver
+              ejemplos.
             </p>
           </Card>
         </div>

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useMood, MOODS, SITUATIONS, type Mood } from "@/lib/mood";
+import { EmotionChoice } from "@/components/EmotionChoice";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
 import {
@@ -503,23 +504,27 @@ function AppPage() {
 
               <form onSubmit={handleEntrySubmit} className="space-y-6" aria-labelledby="diary-form-title">
                 <div>
-                  <Label className="mb-3 block font-medium">1. Elige tu emoción predominante</Label>
+                  <Label className="mb-1 block font-medium">1. Elige tu emoción predominante</Label>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    ¿No sabes cuál es? Pasa el mouse, mantén presionada una emoción o toca{" "}
+                    <span aria-hidden="true">ⓘ</span> para ver ejemplos.
+                  </p>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-h-[220px] overflow-y-auto p-1 border border-border/60 rounded-2xl bg-secondary/20">
                     {MOODS.map((m) => (
-                      <button
+                      <EmotionChoice
                         key={m.id}
-                        type="button"
-                        onClick={() => handleMoodSelect(m.id)}
-                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all hover:scale-102 ${
+                        emotionId={m.id}
+                        selected={selectedMood === m.id}
+                        onSelect={() => handleMoodSelect(m.id)}
+                        className={`w-full flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all hover:scale-102 ${
                           selectedMood === m.id
                             ? "border-primary bg-primary/10 text-primary-foreground font-semibold"
                             : "border-border/40 hover:bg-secondary"
                         }`}
-                        aria-label={`Seleccionar emoción ${m.label}`}
                       >
                         <span className="text-2xl mb-1.5" role="img" aria-hidden="true">{m.emoji}</span>
                         <span className="text-xs text-foreground">{m.label}</span>
-                      </button>
+                      </EmotionChoice>
                     ))}
                   </div>
                 </div>
