@@ -460,6 +460,16 @@ export function MoodProvider({ children }: { children: ReactNode }) {
   // Initialize session and sync with backend if possible
   useEffect(() => {
     const initSession = async () => {
+      // Versiones anteriores guardaban cuentas en localStorage para un "login offline"
+      // sin contraseña; se eliminan para que no queden datos de cuenta en el navegador.
+      try {
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith("emowave_acc_"))
+          .forEach((k) => localStorage.removeItem(k));
+      } catch (e) {
+        void e;
+      }
+
       try {
         const token = api.getToken();
         if (token) {

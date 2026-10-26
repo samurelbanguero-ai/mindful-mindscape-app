@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useMood, type Role, type Visibility } from "@/lib/mood";
+import { useMood, type Visibility } from "@/lib/mood";
 import { auth as authApi, getToken, setToken, clearToken } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -21,31 +21,6 @@ export const Route = createFileRoute("/auth")({
   }),
   component: Auth,
 });
-
-const localKey = (id: string) => `emowave_acc_${id.toLowerCase()}`;
-
-type LocalAccount = {
-  username: string;
-  email: string;
-  role: Role;
-  visibility: Visibility;
-  alias: string;
-};
-
-function saveLocalAccount(acc: LocalAccount) {
-  const data = JSON.stringify(acc);
-  localStorage.setItem(localKey(acc.username), data);
-  localStorage.setItem(localKey(acc.email), data);
-}
-
-function loadLocalAccount(id: string): LocalAccount | null {
-  try {
-    const stored = localStorage.getItem(localKey(id));
-    return stored ? JSON.parse(stored) : null;
-  } catch {
-    return null;
-  }
-}
 
 // Subcomponente OtpVerification integrado
 function OtpVerification({
@@ -62,7 +37,13 @@ function OtpVerification({
       <div className="text-center">
         <h2 className="text-xl font-medium" id="otp-title">Verifica tu correo electrónico</h2>
         <p className="text-sm text-muted-foreground mt-2">
-          Hemos enviado un código OTP de 6 dígitos al correo: <strong className="text-foreground">{email}</strong>.
+          Hemos enviado un código OTP de 6 dígitos a tu correo
+          {email.includes("@") && (
+            <>
+              : <strong className="text-foreground">{email}</strong>
+            </>
+          )}
+          .
         </p>
       </div>
 
@@ -327,29 +308,15 @@ function Auth() {
       const errMsg = err instanceof Error ? err.message : String(err);
 
       if (errMsg.includes("verificar") || errMsg.includes("OTP")) {
-        const matchingAcc = loadLocalAccount(li.id.trim());
-        setOtpEmail(matchingAcc ? matchingAcc.email : li.id.trim());
+        // El backend acepta email o nombre de usuario para verificar el código
+        setOtpEmail(li.id.trim());
         setMode("otp");
         toast.info("Ingresa el código OTP enviado a tu correo.");
         return;
       }
 
-      const acc = loadLocalAccount(li.id.trim());
-      if (!acc) {
-        toast.error(errMsg || "No encontramos esa cuenta. Verifica el servidor.");
-      } else {
-        login({
-          id: 0,
-          username: acc.username,
-          email: acc.email,
-          role: acc.role || "usuario",
-          visibility: acc.visibility || "publico",
-          alias: acc.alias,
-          anonymous: acc.visibility === "anonimo",
-        });
-        toast.info("Modo sin conexión activado 📶");
-        navigate({ to: acc.role === "psicologo" || acc.role === "admin" ? "/psicologo" : "/app" });
-      }
+      // Sin respaldo local: un inicio de sesión fallido nunca abre una sesión
+      toast.error(errMsg || "No pudimos iniciar sesión. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -392,14 +359,6 @@ function Auth() {
         rg.visibility,
         rg.alias.trim(),
       );
-
-      saveLocalAccount({
-        username: rg.username.trim(),
-        email: rg.email.trim(),
-        role: "usuario",
-        visibility: rg.visibility,
-        alias: rg.alias.trim(),
-      });
 
       toast.success("¡Cuenta registrada! Te enviamos un código OTP 🌿");
       setOtpEmail(rg.email.trim());

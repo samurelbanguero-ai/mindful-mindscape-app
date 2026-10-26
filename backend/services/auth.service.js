@@ -158,7 +158,7 @@ class AuthService {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const user = userRepository.findByEmailOrUsername(cleanEmail, cleanEmail);
+    const user = userRepository.findByEmailOrUsername(cleanEmail, email.trim());
     if (!user) {
       throw new ValidationError('Usuario no encontrado');
     }
@@ -216,7 +216,7 @@ class AuthService {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const user = userRepository.findByEmailOrUsername(cleanEmail, cleanEmail);
+    const user = userRepository.findByEmailOrUsername(cleanEmail, email.trim());
     if (!user) {
       throw new ValidationError('Usuario no encontrado');
     }
@@ -240,13 +240,13 @@ class AuthService {
     }
 
     await mailerClient.sendMail({
-      to: cleanEmail,
+      to: user.email,
       subject: 'Nuevo código de verificación — Emowave 🌿',
       text: `Hola ${user.name || user.username},\n\nTu nuevo código de verificación es: ${otp}\n\nEste código expira en ${otpExpMins} minutos.`,
       html: `<p>Hola <strong>${user.name || user.username}</strong>,</p><p>Tu nuevo código de verificación es:</p><h2>${otp}</h2><p>Este código expira en <strong>${otpExpMins}</strong> minutos.</p>`
     });
 
-    auditRepository.createLog(user.id, 'otp_sent', `Nuevo código OTP reenviado a: ${cleanEmail}`, ip, userAgent);
+    auditRepository.createLog(user.id, 'otp_sent', `Nuevo código OTP reenviado a: ${user.email}`, ip, userAgent);
 
     return true;
   }
