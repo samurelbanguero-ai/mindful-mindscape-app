@@ -25,7 +25,6 @@ try {
   // 5. Iniciar la escucha del servidor
   app.listen(PORT, () => {
     logger.info(`✅ Servidor de producción corriendo en http://localhost:${PORT}`);
-    logger.info(`🔑 API Key de Anthropic: ${env.ANTHROPIC_API_KEY ? 'configurada' : '⚠️ NO configurada (modo offline)'}`);
   });
 
 } catch (err) {

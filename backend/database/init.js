@@ -28,7 +28,7 @@ function initDatabase() {
     // Auto-verificar cuentas existentes en desarrollo si no hay SMTP configurado
     if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
       db.prepare("UPDATE users SET email_verified = 1").run();
-      logger.info("Modo desarrollo: Cuentas locales existentes auto-verificadas (sin SMTP).");
+      logger.info("Cuentas auto-verificadas para desarrollo.");
     }
 
     // 5. Iniciar limpieza periódica automática de registros expirados (cada 30 minutos)
@@ -78,14 +78,14 @@ function seedAdminUser() {
       db.prepare(`
         UPDATE users
         SET email = ?, username = ?, password_hash = ?, name = ?,
-            role = 'admin', visibility = 'publico', alias = 'Admin', profile_data = '{}'
+            role = 'admin', visibility = 'publico', alias = 'Admin', profile_data = '{}', email_verified = 1
         WHERE id = ?
       `).run(adminEmail, adminUsername, hash, adminName, adminRecord.id);
       logger.info('Usuario administrador actualizado en la base de datos.');
     } else {
       db.prepare(`
-        INSERT INTO users (email, username, password_hash, name, role, visibility, alias, profile_data)
-        VALUES (?, ?, ?, ?, 'admin', 'publico', 'Admin', '{}')
+        INSERT INTO users (email, username, password_hash, name, role, visibility, alias, profile_data, email_verified)
+        VALUES (?, ?, ?, ?, 'admin', 'publico', 'Admin', '{}', 1)
       `).run(adminEmail, adminUsername, hash, adminName);
       logger.info('Usuario administrador creado en la base de datos.');
     }

@@ -21,7 +21,7 @@ class ClaudeClient {
     }
 
     if (!this.isConfigured()) {
-      return '⚠️ Nota de Emowave: No he podido conectar con el asistente real porque la clave de Anthropic (ANTHROPIC_API_KEY) no está configurada o sigue siendo la clave de ejemplo en tu archivo `.env`. Por favor, registra tu clave API real en el archivo `.env` del backend (o en el entorno del sistema) y reinicia el servidor.';
+      return '⚠️ El asistente de IA no está disponible en este momento. Por favor intenta más tarde.';
     }
 
     const historyMessages = this.formatHistory(history, 10);
@@ -66,8 +66,8 @@ class ClaudeClient {
       }
     }
 
-    logger.error('Todos los modelos de Anthropic fallaron en chat.', { error: lastError?.message });
-    throw new Error(`Error en la API de Anthropic: ${lastError?.message}. Verifica que tu clave API tenga saldo y acceso a los modelos en console.anthropic.com.`);
+    logger.error('Todos los modelos de Anthropic fallaron en chat.');
+    throw new Error('El asistente de IA no está disponible en este momento. Por favor intenta más tarde.');
   }
 
   async helpbotChat(message, history = [], systemPrompt = '') {
@@ -76,7 +76,7 @@ class ClaudeClient {
     }
 
     if (!this.isConfigured()) {
-      return 'El asistente de ayuda de Emowave requiere configurar la clave de Anthropic (ANTHROPIC_API_KEY) en tu archivo `.env`.';
+      return 'El asistente de ayuda no está disponible en este momento. Por favor intenta más tarde.';
     }
 
     const historyMessages = this.formatHistory(history, 8);

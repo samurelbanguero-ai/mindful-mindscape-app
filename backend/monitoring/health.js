@@ -14,7 +14,6 @@ function getHealthStatus() {
     ok: dbOk,
     message: dbOk ? 'Backend funcionando correctamente' : 'Error en la base de datos',
     db: dbOk ? 'connected' : 'disconnected',
-    hasApiKey: !!env.ANTHROPIC_API_KEY,
     timestamp: new Date().toISOString()
   };
 }
