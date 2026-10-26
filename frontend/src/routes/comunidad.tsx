@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useMood, displayAuthor, containsBadWords, MOODS, REACTIONS, type Post } from "@/lib/mood";
+import { formatDateTime } from "@/lib/dates";
 import { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
 import { Users, Plus, Heart, Flag, MessageCircle, Send } from "lucide-react";
@@ -117,17 +118,7 @@ export function Comunidad() {
   };
 
   const formattedDate = (timestamp: number) => {
-    try {
-      const d = new Date(timestamp);
-      return d.toLocaleDateString("es-ES", {
-        day: "numeric",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch (_) {
-      return String(timestamp);
-    }
+    return formatDateTime(timestamp);
   };
 
   return (

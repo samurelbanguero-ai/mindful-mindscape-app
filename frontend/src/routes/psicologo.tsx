@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useMood } from "@/lib/mood";
+import { formatDateTime } from "@/lib/dates";
 import { AnxietyIndicator } from "@/components/AnxietyIndicator";
 import { support as supportApi, admin as adminApi, community as communityApi, type SupportRequest, type AuditLog } from "@/lib/api";
 import { useEffect, useState, useMemo, useRef } from "react";
@@ -322,19 +323,7 @@ export function Panel() {
 
   const formattedDate = (dateStr: string) => {
     if (!dateStr) return "";
-    try {
-      const formattedStr = dateStr.includes(" ") && !dateStr.includes("T") ? dateStr.replace(" ", "T") : dateStr;
-      const d = new Date(formattedStr);
-      if (isNaN(d.getTime())) return dateStr;
-      return d.toLocaleDateString("es-ES", {
-        day: "numeric",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch (_) {
-      return dateStr;
-    }
+    return formatDateTime(dateStr);
   };
 
   // Recharts Stats

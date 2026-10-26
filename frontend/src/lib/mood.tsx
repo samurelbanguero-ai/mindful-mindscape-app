@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import * as api from "./api";
+import { todayKey, shiftDateKey } from "./dates";
 import { toast } from "sonner";
 
 import catalogo from "../../../shared/emotions.json";
@@ -807,11 +808,9 @@ export function MoodProvider({ children }: { children: ReactNode }) {
     if (!entries.length) return { streak: 0, treeLevel: 0 };
     const dates = new Set(entries.map((e) => e.date));
     let s = 0;
-    const today = new Date();
+    const today = todayKey();
     for (let i = 0; i < 60; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const k = d.toISOString().slice(0, 10);
+      const k = shiftDateKey(today, -i);
       if (dates.has(k)) s++;
       else if (i > 0) break;
     }

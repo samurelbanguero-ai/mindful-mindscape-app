@@ -1,3 +1,5 @@
+import { todayKey } from "./dates";
+
 // ✅ FIX: getApiBaseUrl es lazy (función) — no se evalúa en tiempo de módulo
 // evita errores de SSR donde window no existe al momento de importar
 const getApiBaseUrl = (): string => {
@@ -424,12 +426,8 @@ export type AnxietyEstimate = {
   disclaimer: string;
 };
 
-// Fecha local (no UTC) para que la ventana coincida con las fechas del diario
-const localToday = (): string => {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-};
+// Fecha de Colombia para que la ventana coincida con las fechas del diario
+const localToday = (): string => todayKey();
 
 export const ml = {
   getMyAnxiety: (): Promise<AnxietyEstimate> => apiRequest(`/ml/anxiety?today=${localToday()}`),

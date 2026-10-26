@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useMood, MOODS, SITUATIONS, type Mood } from "@/lib/mood";
+import { todayKey, shiftDateKey } from "@/lib/dates";
 import { EmotionChoice } from "@/components/EmotionChoice";
 import { AnxietyIndicator } from "@/components/AnxietyIndicator";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -272,7 +273,7 @@ function AppPage() {
 
   // Cargar gratitud guardada hoy de localStorage
   useEffect(() => {
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = todayKey();
     const saved = localStorage.getItem(`gratitude_${todayStr}`);
     if (saved) {
       try {
@@ -320,7 +321,7 @@ function AppPage() {
       flower: randomFlower,
     };
 
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = todayKey();
     localStorage.setItem(`gratitude_${todayStr}`, JSON.stringify(newGratitude));
     setGratitudeSaved(newGratitude);
     setGratitudeInput("");
@@ -377,7 +378,7 @@ function AppPage() {
     setSubmittingEntry(true);
     try {
       await addEntry({
-        date: new Date().toISOString().slice(0, 10),
+        date: todayKey(),
         mood: selectedMood,
         intensity,
         situations,
@@ -442,11 +443,8 @@ function AppPage() {
   const [chartRange, setChartRange] = useState<7 | 30>(7);
   const chartData = useMemo(() => {
     const range = chartRange;
-    const list = Array.from({ length: range }, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - (range - 1 - i));
-      return d.toISOString().slice(0, 10);
-    });
+    const today = todayKey();
+    const list = Array.from({ length: range }, (_, i) => shiftDateKey(today, -(range - 1 - i)));
 
     return list.map((dateStr) => {
       const dayEntries = entries.filter((e: any) => e.date === dateStr);
@@ -922,7 +920,7 @@ function AppPage() {
                             </div>
                             <button
                               onClick={() => {
-                                const todayStr = new Date().toISOString().slice(0, 10);
+                                const todayStr = todayKey();
                                 localStorage.removeItem(`gratitude_${todayStr}`);
                                 setGratitudeSaved(null);
                               }}

@@ -1,14 +1,13 @@
 const anxietyService = require('../services/anxiety.service');
 const { DATE_REGEX } = require('../shared/regex');
+const { todayKey } = require('../shared/dates');
 const { sendSuccess } = require('../responses/success');
 
-// El cliente envía su fecha local para que la ventana de días coincida con
-// las fechas guardadas en el diario; si no llega o es inválida, se usa la del servidor.
+// El cliente envía su fecha para que la ventana de días coincida con las fechas
+// del diario; si no llega o es inválida, se usa el día actual en Colombia.
 function resolveToday(query) {
   const today = query.today;
-  return typeof today === 'string' && DATE_REGEX.test(today)
-    ? today
-    : new Date().toISOString().slice(0, 10);
+  return typeof today === 'string' && DATE_REGEX.test(today) ? today : todayKey();
 }
 
 class MlController {

@@ -3,6 +3,7 @@ import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useMood, MOODS, type Mood, getParentMood } from "@/lib/mood";
+import { todayKey } from "@/lib/dates";
 import { useEffect, useMemo } from "react";
 import { Music, Film, Sparkles, Wind, Heart } from "lucide-react";
 
@@ -75,7 +76,7 @@ function Recos() {
   }, [authReady, user, navigate]);
 
   const todayMood = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayKey();
     return entries.find((e) => e.date === today)?.mood ?? mood;
   }, [entries, mood]);
 
