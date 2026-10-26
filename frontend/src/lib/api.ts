@@ -37,17 +37,31 @@ export const clearToken = (): void => {
 // ─────────────────────────────────────────────
 // PETICIÓN BASE & AUTOMATIC REFRESH TOKEN (HttpOnly)
 // ─────────────────────────────────────────────
-let isRefreshing = false;
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-let refreshSubscribers: Function[] = [];
+// Un único refresco en curso, compartido por todas las peticiones que reciban 401
+// al mismo tiempo. Antes, la petición que disparaba el refresco nunca se resolvía
+// y, si el refresco fallaba, las que esperaban quedaban colgadas.
+let refreshInFlight: Promise<string> | null = null;
 
-const subscribeTokenRefresh = (cb: (token: string) => void) => {
-  refreshSubscribers.push(cb);
-};
-
-const onRefreshed = (token: string) => {
-  refreshSubscribers.forEach((cb) => cb(token));
-  refreshSubscribers = [];
+const refreshAccessToken = (base: string): Promise<string> => {
+  if (!refreshInFlight) {
+    refreshInFlight = (async () => {
+      const refreshResponse = await fetch(`${base}/auth/refresh-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      const refreshData = await refreshResponse.json().catch(() => ({}));
+      const newAccessToken = refreshData?.accessToken || refreshData?.data?.accessToken;
+      if (!refreshResponse.ok || !newAccessToken) {
+        throw new Error("Sesión expirada");
+      }
+      setToken(newAccessToken);
+      return newAccessToken as string;
+    })().finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,53 +76,22 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}): P
   const fetchOptions: RequestInit = {
     ...options,
     headers,
-    credentials: "include" // Habilitar envío y recepción de cookies HttpOnly
+    credentials: "include", // Habilitar envío y recepción de cookies HttpOnly
   };
 
   let response = await fetch(`${base}${endpoint}`, fetchOptions);
 
-  // Si obtenemos 401 y no es login o el propio refresh, intentar renovar el access token
+  // Si obtenemos 401 y no es login o el propio refresh, renovar el access token y reintentar una vez
   if (response.status === 401 && endpoint !== "/auth/login" && endpoint !== "/auth/refresh-token") {
-    if (!isRefreshing) {
-      isRefreshing = true;
-      try {
-        const refreshResponse = await fetch(`${base}/auth/refresh-token`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include"
-        });
-        const refreshData = await refreshResponse.json();
-
-        const newAccessToken = refreshData?.accessToken || refreshData?.data?.accessToken;
-        if (refreshResponse.ok && newAccessToken) {
-          setToken(newAccessToken);
-          isRefreshing = false;
-          onRefreshed(newAccessToken);
-        } else {
-          isRefreshing = false;
-          clearToken();
-          throw new Error("Sesión expirada");
-        }
-      } catch (err) {
-        isRefreshing = false;
-        clearToken();
-        throw err;
-      }
+    let newAccessToken: string;
+    try {
+      newAccessToken = await refreshAccessToken(base);
+    } catch {
+      clearToken();
+      throw new Error("Sesión expirada");
     }
-
-    return new Promise((resolve, reject) => {
-      subscribeTokenRefresh((newToken: string) => {
-        headers.set("Authorization", `Bearer ${newToken}`);
-        fetch(`${base}${endpoint}`, { ...options, headers, credentials: "include" })
-          .then((res) => {
-            if (!res.ok) {
-              return res.json().then((d) => reject(new Error(d?.error || "Error tras refresco")));
-            }
-            return res.json().then((d) => resolve(d.data !== undefined ? d.data : d));
-          })
-          .catch(reject);
-      });
-    });
+    headers.set("Authorization", `Bearer ${newAccessToken}`);
+    response = await fetch(`${base}${endpoint}`, fetchOptions);
   }
 
   const data = await response.json().catch(() => ({}));
