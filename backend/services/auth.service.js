@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const env = require('../config/env');
-const jwtConfig = require('../config/jwt');
 const userRepository = require('../repositories/user.repository');
 const authRepository = require('../repositories/auth.repository');
 const auditRepository = require('../repositories/audit.repository');
@@ -14,6 +13,7 @@ const AppError = require('../exceptions/AppError');
 const { sanitizeText } = require('../utils/sanitizer');
 const { compareConstantTime, hashValue } = require('../shared/helpers');
 const { VALID_ROLES } = require('../shared/constants');
+const { generateAccessToken, generateRefreshToken } = require('../utils/tokens');
 
 class AuthService {
   async register(data, ip = '', userAgent = '') {
@@ -498,14 +498,11 @@ class AuthService {
   }
 
   generateAccessToken(userId) {
-    const expires = process.env.ACCESS_TOKEN_EXPIRES || '15m';
-    return jwt.sign({ id: userId }, jwtConfig.secret, { expiresIn: expires });
+    return generateAccessToken(userId);
   }
 
   generateRefreshToken() {
-    const expires = process.env.REFRESH_TOKEN_EXPIRES || '7d';
-    // Firmar con payload básico y secreto de refresh
-    return jwt.sign({ type: 'refresh' }, env.JWT_REFRESH_SECRET, { expiresIn: expires });
+    return generateRefreshToken();
   }
 }
 
