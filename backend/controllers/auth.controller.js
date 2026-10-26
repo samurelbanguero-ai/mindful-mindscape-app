@@ -2,6 +2,15 @@ const authService = require('../services/auth.service');
 const authDTO = require('../dto/auth.dto');
 const { sendSuccess } = require('../responses/success');
 const { getClientInfo } = require('../utils/request');
+
+// Cookie HttpOnly del refresh token (mismas opciones al crearla y al borrarla)
+const REFRESH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.COOKIE_SECURE === 'true',
+  sameSite: process.env.COOKIE_SAMESITE || 'lax',
+  domain: process.env.COOKIE_DOMAIN || undefined
+};
+const REFRESH_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 días
 const { ValidationError } = require('../exceptions/ValidationError');
 
 class AuthController {
@@ -78,13 +87,7 @@ class AuthController {
       const { user, accessToken, refreshToken } = await authService.login(req.body, ip, userAgent);
 
       // Inyectar el Refresh Token únicamente en una cookie HttpOnly
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: process.env.COOKIE_SECURE === 'true',
-        sameSite: process.env.COOKIE_SAMESITE || 'lax',
-        domain: process.env.COOKIE_DOMAIN || undefined,
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
-      });
+      res.cookie('refreshToken', refreshToken, { ...REFRESH_COOKIE_OPTIONS, maxAge: REFRESH_COOKIE_MAX_AGE_MS });
 
       const responseData = authDTO.toResponse(user, accessToken);
       return sendSuccess(res, responseData, 200);
@@ -102,13 +105,7 @@ class AuthController {
       const { accessToken, refreshToken: newRefreshToken } = await authService.refreshToken(token, ip, userAgent);
 
       // Inyectar el nuevo Refresh Token
-      res.cookie('refreshToken', newRefreshToken, {
-        httpOnly: true,
-        secure: process.env.COOKIE_SECURE === 'true',
-        sameSite: process.env.COOKIE_SAMESITE || 'lax',
-        domain: process.env.COOKIE_DOMAIN || undefined,
-        maxAge: 7 * 24 * 60 * 60 * 1000
-      });
+      res.cookie('refreshToken', newRefreshToken, { ...REFRESH_COOKIE_OPTIONS, maxAge: REFRESH_COOKIE_MAX_AGE_MS });
 
       return sendSuccess(res, { accessToken }, 200);
     } catch (err) {
@@ -124,12 +121,7 @@ class AuthController {
       await authService.logout(token, ip, userAgent);
 
       // Limpiar cookie HttpOnly
-      res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: process.env.COOKIE_SECURE === 'true',
-        sameSite: process.env.COOKIE_SAMESITE || 'lax',
-        domain: process.env.COOKIE_DOMAIN || undefined
-      });
+      res.clearCookie('refreshToken', REFRESH_COOKIE_OPTIONS);
 
       return sendSuccess(res, { message: 'Sesión cerrada con éxito.' }, 200);
     } catch (err) {
@@ -145,12 +137,7 @@ class AuthController {
       await authService.logoutAll(userId, ip, userAgent);
 
       // Limpiar cookie
-      res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: process.env.COOKIE_SECURE === 'true',
-        sameSite: process.env.COOKIE_SAMESITE || 'lax',
-        domain: process.env.COOKIE_DOMAIN || undefined
-      });
+      res.clearCookie('refreshToken', REFRESH_COOKIE_OPTIONS);
 
       return sendSuccess(res, { message: 'Sesiones cerradas en todos tus dispositivos.' }, 200);
     } catch (err) {

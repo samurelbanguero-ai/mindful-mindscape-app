@@ -24,21 +24,30 @@ function serializeUser(user) {
  * Perfil visible para otras personas: nunca incluye email, nombre real, rol ni
  * datos de perfil, y respeta la visibilidad elegida por el usuario.
  */
+const ANONYMOUS_NAME = 'Anónimo/a';
+
+/**
+ * Nombre que ven otras personas según la visibilidad elegida: anónimo, alias o
+ * nombre de usuario. Si eligió alias pero no tiene uno, se muestra como anónimo
+ * (nunca se cae al nombre de usuario).
+ */
+function publicDisplayName({ visibility = 'publico', alias, username }) {
+  if (visibility === 'anonimo') return ANONYMOUS_NAME;
+  if (visibility === 'alias') return alias || ANONYMOUS_NAME;
+  return username || ANONYMOUS_NAME;
+}
+
 function toPublicProfile(user) {
   if (!user) return null;
 
   const visibility = user.visibility || 'publico';
   if (visibility === 'anonimo') {
-    return { id: user.id, displayName: 'Anónimo/a', visibility, avatar: '', bio: '' };
+    return { id: user.id, displayName: ANONYMOUS_NAME, visibility, avatar: '', bio: '' };
   }
-
-  const displayName = visibility === 'alias'
-    ? (user.alias || 'Anónimo/a')
-    : user.username;
 
   return {
     id: user.id,
-    displayName,
+    displayName: publicDisplayName(user),
     visibility,
     avatar: user.avatar || '',
     bio: user.bio || ''
@@ -65,7 +74,9 @@ function compareConstantTime(plainValue, storedHash) {
 }
 
 module.exports = {
+  ANONYMOUS_NAME,
   serializeUser,
+  publicDisplayName,
   toPublicProfile,
   hashValue,
   compareConstantTime

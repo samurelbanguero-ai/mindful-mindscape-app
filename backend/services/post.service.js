@@ -6,6 +6,7 @@ const ValidationError = require('../exceptions/ValidationError');
 const { sanitizeText } = require('../utils/sanitizer');
 const { BAD_WORDS_REGEX } = require('../shared/regex');
 const moderatorService = require('./moderator.service');
+const postDTO = require('../dto/post.dto');
 
 class PostService {
   async getPosts(currentUser, limitQuery, offsetQuery) {
@@ -36,27 +37,7 @@ class PostService {
         repliesByPost[reply.post_id] = [];
       }
 
-      let authorDisplay = 'anónimo';
-      if (reply.is_anonymous === 0) {
-        if (reply.author_visibility === 'alias') {
-          authorDisplay = reply.author_alias || reply.author_username;
-        } else if (reply.author_visibility === 'publico') {
-          authorDisplay = reply.author_username;
-        }
-      }
-
-      let timeVal = Date.now();
-      try {
-        timeVal = new Date(reply.created_at.replace(' ', 'T') + 'Z').getTime();
-      } catch (_) {}
-
-      repliesByPost[reply.post_id].push({
-        id: String(reply.id),
-        author: authorDisplay,
-        anon: reply.is_anonymous === 1,
-        text: reply.content,
-        createdAt: timeVal || Date.now()
-      });
+      repliesByPost[reply.post_id].push(postDTO.toReplyResponse(reply));
     }
 
     return {
@@ -120,22 +101,12 @@ class PostService {
 
     const reply = postRepository.findReplyById(replyId);
 
-    let authorDisplay = 'anónimo';
-    if (!is_anonymous) {
-      if (currentUserVisibility === 'alias') {
-        authorDisplay = currentUserAlias || currentUserUsername;
-      } else if (currentUserVisibility === 'publico') {
-        authorDisplay = currentUserUsername;
-      }
-    }
-
-    return {
-      id: String(reply.id),
-      author: authorDisplay,
-      anon: reply.is_anonymous === 1,
-      text: reply.content,
-      createdAt: Date.now()
-    };
+    return postDTO.toReplyResponse({
+      ...reply,
+      author_visibility: currentUserVisibility,
+      author_alias: currentUserAlias,
+      author_username: currentUserUsername
+    });
   }
 
   async reactPost(userId, postId, reaction) {

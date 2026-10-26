@@ -6,6 +6,7 @@ const userRepository = require('../repositories/user.repository');
 const ValidationError = require('../exceptions/ValidationError');
 const AppError = require('../exceptions/AppError');
 const { sendSuccess } = require('../responses/success');
+const { SPOTIFY_QUERIES } = require('../shared/constants');
 
 // El state firmado solo sirve para este flujo OAuth
 const SPOTIFY_STATE_PURPOSE = 'spotify_oauth';
@@ -86,15 +87,7 @@ class SpotifyController {
 
       const parentMood = req.query.parentMood || 'calma';
       
-      const queries = {
-        calma: 'calm sleep ambient relaxation chill',
-        alegria: 'happy upbeat pop feel good feelgood dance energetic',
-        tristeza: 'sad piano melancholy slow chill acoustic sadness',
-        ansiedad: 'anxiety relief peaceful soft rain focus mediation',
-        energia: 'workout motivation party high energy rock gym electronic'
-      };
-
-      const searchQuery = queries[parentMood] || queries.calma;
+      const searchQuery = SPOTIFY_QUERIES[parentMood] || SPOTIFY_QUERIES.calma;
       const playlists = await spotifyClient.searchPlaylists(token, searchQuery);
 
       return sendSuccess(res, { playlists }, 200);

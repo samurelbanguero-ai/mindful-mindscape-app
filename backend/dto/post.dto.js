@@ -1,29 +1,33 @@
+const { ANONYMOUS_NAME, publicDisplayName } = require('../shared/helpers');
+
+// Autor de una publicación o respuesta, respetando si se publicó como anónimo
+// y la visibilidad elegida por la persona.
+function authorOf(row) {
+  if (row.is_anonymous === 1) return ANONYMOUS_NAME;
+  return publicDisplayName({
+    visibility: row.author_visibility,
+    alias: row.author_alias,
+    username: row.author_username
+  });
+}
+
+// SQLite guarda CURRENT_TIMESTAMP en UTC sin zona ("2026-10-26 22:15:00")
+function createdAtMs(row) {
+  if (!row.created_at) return Date.now();
+  const ms = new Date(row.created_at.replace(' ', 'T') + 'Z').getTime();
+  return Number.isNaN(ms) ? Date.now() : ms;
+}
+
 class PostDTO {
   toResponse(post, reactionsByPost = {}, userReactionByPost = {}, repliesByPost = []) {
-    let authorDisplay = 'anónimo';
-    if (post.is_anonymous === 0) {
-      if (post.author_visibility === 'alias') {
-        authorDisplay = post.author_alias || post.author_username;
-      } else if (post.author_visibility === 'publico') {
-        authorDisplay = post.author_username;
-      }
-    }
-
-    let timeVal = Date.now();
-    try {
-      if (post.created_at) {
-        timeVal = new Date(post.created_at.replace(' ', 'T') + 'Z').getTime();
-      }
-    } catch (_) {}
-
     return {
       id: String(post.id),
-      author: authorDisplay,
+      author: authorOf(post),
       anon: post.is_anonymous === 1,
       title: post.title || 'Publicación',
       body: post.body || post.content || '',
       mood: post.mood || undefined,
-      createdAt: timeVal || Date.now(),
+      createdAt: createdAtMs(post),
       reactions: reactionsByPost[post.id] || {},
       reactedBy: userReactionByPost[post.id],
       comments: repliesByPost || [],
@@ -33,28 +37,12 @@ class PostDTO {
   }
 
   toReplyResponse(reply) {
-    let authorDisplay = 'anónimo';
-    if (reply.is_anonymous === 0) {
-      if (reply.author_visibility === 'alias') {
-        authorDisplay = reply.author_alias || reply.author_username;
-      } else if (reply.author_visibility === 'publico') {
-        authorDisplay = reply.author_username;
-      }
-    }
-
-    let timeVal = Date.now();
-    try {
-      if (reply.created_at) {
-        timeVal = new Date(reply.created_at.replace(' ', 'T') + 'Z').getTime();
-      }
-    } catch (_) {}
-
     return {
       id: String(reply.id),
-      author: authorDisplay,
+      author: authorOf(reply),
       anon: reply.is_anonymous === 1,
       text: reply.content,
-      createdAt: timeVal || Date.now()
+      createdAt: createdAtMs(reply)
     };
   }
 }
