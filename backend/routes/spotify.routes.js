@@ -4,8 +4,9 @@ const authMiddleware = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
-// Rutas de Spotify OAuth bajo /auth/spotify
-router.get('/auth/spotify', spotifyController.connectSpotify);
+// OAuth: el frontend pide la URL de autorización con su sesión en el header
+// Authorization (nunca en la URL); Spotify redirige luego al callback.
+router.post('/spotify/connect', authMiddleware, spotifyController.connectSpotify);
 router.get('/auth/spotify/callback', spotifyController.callback);
 
 // Rutas de Spotify API bajo /spotify/...

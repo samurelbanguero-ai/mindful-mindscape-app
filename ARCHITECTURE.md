@@ -95,9 +95,9 @@ sequenceDiagram
     participant Servidor as Servidor backend (Express)
     participant Spotify as API Spotify Accounts
 
-    Usuario->>Servidor: 1. GET /api/auth/spotify?token={JWT}
-    Note over Servidor: Valida JWT y firma el parámetro 'state'
-    Servidor->>Usuario: 2. Redirige a Spotify Auth URL (con ClientID, RedirectURI, Scopes y State)
+    Usuario->>Servidor: 1. POST /api/spotify/connect (JWT en el header Authorization)
+    Note over Servidor: Valida JWT y firma el parámetro 'state' (propósito spotify_oauth)
+    Servidor->>Usuario: 2. Devuelve la URL de autorización de Spotify (ClientID, RedirectURI, Scopes y State) y el navegador redirige
     Usuario->>Spotify: 3. Autoriza la aplicación Emowave
     Spotify->>Servidor: 4. GET /api/auth/spotify/callback?code={CODE}&state={STATE}
     Note over Servidor: Valida parámetro 'state' (mitiga CSRF)<br/>Intercambia 'code' por Tokens

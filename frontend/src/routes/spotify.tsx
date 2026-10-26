@@ -6,7 +6,7 @@ import { useMood, MOODS, getParentMood } from "@/lib/mood";
 import { useEffect, useState, useMemo } from "react";
 import { Info, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { getApiUrl, getToken, spotify as spotifyApi, auth as authApi } from "@/lib/api";
+import { spotify as spotifyApi } from "@/lib/api";
 
 export const Route = createFileRoute("/spotify")({
   head: () => ({ meta: [{ title: "Spotify — Emowave" }] }),
@@ -86,26 +86,17 @@ function Spot() {
   if (!authReady || !user) return null;
 
   const connect = async () => {
-    let token = getToken();
-    if (!token) {
-      setLoading(true);
-      try {
-        // Intentar refresh de sesión silencioso llamando al endpoint getMe
-        const meRes = await authApi.getMe();
-        token = getToken();
-      } catch (err) {
-        console.warn("Intento de refresh automático falló", err);
-      } finally {
-        setLoading(false);
-      }
+    setLoading(true);
+    try {
+      // El backend recibe la sesión por el header Authorization y devuelve la URL de
+      // autorización de Spotify; el token de acceso nunca viaja en la URL.
+      const { url } = await spotifyApi.getConnectUrl();
+      window.location.href = url;
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      toast.error(errMsg || "No se pudo iniciar la conexión con Spotify.");
+      setLoading(false);
     }
-
-    if (!token) {
-      toast.error("Debes iniciar sesión de nuevo para sincronizar con Spotify.");
-      return;
-    }
-    // Redirigir a la URL del backend que inicia el flujo de Spotify OAuth
-    window.location.href = `${getApiUrl()}/auth/spotify?token=${token}`;
   };
 
   const handleDisconnect = async () => {

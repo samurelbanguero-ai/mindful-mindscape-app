@@ -285,6 +285,7 @@ export const admin = {
 // SPOTIFY REAL API
 // ─────────────────────────────────────────────
 export const spotify = {
+  getConnectUrl: (): Promise<{ url: string }> => apiRequest("/spotify/connect", { method: "POST" }),
   disconnect: () => apiRequest("/spotify/disconnect", { method: "POST" }),
   getPlaylists: (parentMood: string) => apiRequest(`/spotify/playlists?parentMood=${parentMood}`),
 };

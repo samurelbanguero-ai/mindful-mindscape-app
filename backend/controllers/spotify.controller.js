@@ -4,36 +4,25 @@ const spotifyClient = require('../integrations/spotify/spotify.client');
 const spotifyRepository = require('../repositories/spotify.repository');
 const userRepository = require('../repositories/user.repository');
 const ValidationError = require('../exceptions/ValidationError');
-const UnauthorizedError = require('../exceptions/UnauthorizedError');
+const AppError = require('../exceptions/AppError');
 const { sendSuccess } = require('../responses/success');
+
+// El state firmado solo sirve para este flujo OAuth
+const SPOTIFY_STATE_PURPOSE = 'spotify_oauth';
 
 class SpotifyController {
   async connectSpotify(req, res, next) {
     try {
-      const { token } = req.query;
-      if (!token) {
-        throw new ValidationError('Token es requerido');
-      }
-
-      let userId;
-      try {
-        const decoded = jwt.verify(token, env.JWT_SECRET);
-        userId = decoded.id;
-      } catch (_) {
-        throw new UnauthorizedError('Token inválido');
-      }
-
       if (!spotifyClient.isConfigured()) {
-        const frontendUrl = env.FRONTEND_URL;
-        return res.redirect(`${frontendUrl}/spotify?spotify_connected=error&error=${encodeURIComponent('Spotify no está configurado en el servidor. Agrega tu SPOTIFY_CLIENT_ID y SECRET en el archivo .env.')}`);
+        throw new AppError('Spotify no está configurado en el servidor.', 503);
       }
 
-      const state = jwt.sign({ userId }, env.JWT_SECRET, { expiresIn: '15m' });
+      const state = jwt.sign({ userId: req.user.id, purpose: SPOTIFY_STATE_PURPOSE }, env.JWT_SECRET, { expiresIn: '15m' });
       const scopes = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative';
-      
-      const spotifyAuthUrl = `https://accounts.spotify.com/authorize?response_type=code&client_id=${spotifyClient.clientId}&scope=${encodeURIComponent(scopes)}&redirect_uri=${encodeURIComponent(spotifyClient.redirectUri)}&state=${state}`;
-      
-      return res.redirect(spotifyAuthUrl);
+
+      const url = `https://accounts.spotify.com/authorize?response_type=code&client_id=${spotifyClient.clientId}&scope=${encodeURIComponent(scopes)}&redirect_uri=${encodeURIComponent(spotifyClient.redirectUri)}&state=${state}`;
+
+      return sendSuccess(res, { url }, 200);
     } catch (err) {
       next(err);
     }
@@ -51,6 +40,7 @@ class SpotifyController {
       let userId;
       try {
         const decoded = jwt.verify(state, env.JWT_SECRET);
+        if (decoded.purpose !== SPOTIFY_STATE_PURPOSE) throw new Error('state con propósito inválido');
         userId = decoded.userId;
       } catch (_) {
         return res.redirect(`${frontendUrl}/spotify?spotify_connected=error`);
