@@ -2,13 +2,12 @@
 // evita errores de SSR donde window no existe al momento de importar
 const getApiBaseUrl = (): string => {
   if (typeof window === "undefined") {
-    // SSR / server-side: usar variable de entorno
+    // SSR / server-side: usar variable de entorno (llamada directa al backend)
     return import.meta.env.VITE_API_URL || "http://localhost:3000/api";
   }
-  const port = window.location.port;
-  if (port === "2121") return "http://localhost:2122/api"; // Redirigir al backend de Docker en 2122
-  if (port === "5173") return "http://localhost:3000/api"; // Vite local
-  return import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  // Cliente: ruta relativa. El dev server de Vite (o el proxy en producción)
+  // la reenvía al backend, sin depender de que el navegador alcance otro puerto.
+  return "/api";
 };
 
 // ✅ FIX: exportar como función para que se evalúe en runtime, no en import

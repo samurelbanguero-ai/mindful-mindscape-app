@@ -6,16 +6,26 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+// El backend siempre es alcanzable en esta URL desde el proceso de Vite
+// (dentro del contenedor: red de Docker; en local: localhost).
+const backendTarget = (process.env.VITE_API_URL || "http://localhost:3000/api").replace(/\/api\/?$/, "");
+
 export default defineConfig({
   tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
-    server: { entry: "server" },
+    server: {
+      entry: "server",
+    },
   },
+
   vite: {
     server: {
-      hmr: {
-        overlay: false,
+      host: "0.0.0.0",
+      allowedHosts: true,
+      proxy: {
+        "/api": {
+          target: backendTarget,
+          changeOrigin: true,
+        },
       },
     },
   },

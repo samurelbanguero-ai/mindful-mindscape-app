@@ -18,9 +18,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "2121:5173"
+      - "3031:5173"
     environment:
-      - VITE_API_URL=http://localhost:2122/api
+      - VITE_API_URL=http://backend:3000/api
       - CHOKIDAR_USEPOLLING=true
     volumes:
       - ./frontend:/app
