@@ -1,4 +1,5 @@
 const config = require('../config/security');
+const { getClientInfo } = require('../utils/request');
 
 const authRateLimitMap = new Map();
 const loginRateLimitMap = new Map();
@@ -30,7 +31,7 @@ function createRateLimiter(map, limits, getClientKey) {
   };
 }
 
-const getIpKey = (req) => req.ip || req.socket?.remoteAddress || 'unknown';
+const getIpKey = (req) => getClientInfo(req).ip || 'unknown';
 
 const authRateLimit = createRateLimiter(
   authRateLimitMap,

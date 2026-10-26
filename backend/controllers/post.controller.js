@@ -1,6 +1,7 @@
 const postService = require('../services/post.service');
 const postDTO = require('../dto/post.dto');
 const { sendSuccess } = require('../responses/success');
+const { getClientInfo } = require('../utils/request');
 
 class PostController {
   async getPosts(req, res, next) {
@@ -97,7 +98,7 @@ class PostController {
   async approvePost(req, res, next) {
     try {
       const postId = Number(req.params.postId);
-      await postService.approvePost(req.user.id, postId);
+      await postService.approvePost(req.user.id, postId, getClientInfo(req));
       const responseData = {
         success: true,
         message: 'Publicación aprobada y restaurada'
@@ -111,7 +112,7 @@ class PostController {
   async rejectPost(req, res, next) {
     try {
       const postId = Number(req.params.postId);
-      await postService.rejectPost(req.user.id, postId);
+      await postService.rejectPost(req.user.id, postId, getClientInfo(req));
       const responseData = {
         success: true,
         message: 'Publicación rechazada'
@@ -125,7 +126,7 @@ class PostController {
   async editPostAdmin(req, res, next) {
     try {
       const postId = Number(req.params.postId);
-      await postService.editPostAdmin(req.user.id, postId, req.body);
+      await postService.editPostAdmin(req.user.id, postId, req.body, getClientInfo(req));
       const responseData = {
         success: true,
         message: 'Publicación editada'

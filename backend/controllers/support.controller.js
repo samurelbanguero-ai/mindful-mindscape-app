@@ -1,6 +1,7 @@
 const supportService = require('../services/support.service');
 const supportDTO = require('../dto/support.dto');
 const { sendSuccess } = require('../responses/success');
+const { getClientInfo } = require('../utils/request');
 
 class SupportController {
   async requestSupport(req, res, next) {
@@ -51,7 +52,7 @@ class SupportController {
   async claimRequest(req, res, next) {
     try {
       const requestId = Number(req.params.id);
-      const request = await supportService.claimRequest(req.user, requestId);
+      const request = await supportService.claimRequest(req.user, requestId, getClientInfo(req));
       return sendSuccess(res, { success: true, request: supportDTO.toRequestResponse(request).request }, 200);
     } catch (err) {
       next(err);
@@ -72,7 +73,7 @@ class SupportController {
   async sendSupportMessage(req, res, next) {
     try {
       const requestId = Number(req.params.id);
-      await supportService.sendSupportMessage(req.user, requestId, req.body);
+      await supportService.sendSupportMessage(req.user, requestId, req.body, getClientInfo(req));
       return sendSuccess(res, { success: true, message: 'Mensaje enviado' }, 201);
     } catch (err) {
       next(err);
@@ -82,7 +83,7 @@ class SupportController {
   async resolveSupportRequest(req, res, next) {
     try {
       const requestId = Number(req.params.id);
-      await supportService.resolveSupportRequest(req.user, requestId);
+      await supportService.resolveSupportRequest(req.user, requestId, getClientInfo(req));
       return sendSuccess(res, { success: true, message: 'Caso de apoyo resuelto' }, 200);
     } catch (err) {
       next(err);

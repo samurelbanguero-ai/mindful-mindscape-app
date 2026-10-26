@@ -97,7 +97,7 @@ class SupportService {
   }
 
   /** Asigna el caso al profesional; atómico para que dos psicólogos no tomen el mismo caso. */
-  async claimRequest(currentUser, requestId) {
+  async claimRequest(currentUser, requestId, client = {}) {
     const request = supportRepository.findRequestById(requestId);
     if (!request) {
       throw new NotFoundError('Solicitud no encontrada');
@@ -109,11 +109,11 @@ class SupportService {
       throw new AppError('Este caso ya fue tomado por otro profesional.', 409);
     }
 
-    auditRepository.createLog(currentUser.id, 'claim_support_request', JSON.stringify({ requestId }));
+    auditRepository.createLog(currentUser.id, 'claim_support_request', JSON.stringify({ requestId }), client.ip, client.userAgent);
     return supportRepository.findRequestById(requestId);
   }
 
-  async sendSupportMessage(currentUser, requestId, data) {
+  async sendSupportMessage(currentUser, requestId, data, client = {}) {
     let request = supportRepository.findRequestById(requestId);
     if (!request) {
       throw new NotFoundError('Solicitud no encontrada');
@@ -121,7 +121,7 @@ class SupportService {
 
     // Responder un caso pendiente sin asignar equivale a tomarlo
     if (isUnassignedPending(request) && canClaimRequest(currentUser, request)) {
-      request = await this.claimRequest(currentUser, requestId);
+      request = await this.claimRequest(currentUser, requestId, client);
     }
 
     if (!canAccessRequest(currentUser, request)) {
@@ -136,11 +136,11 @@ class SupportService {
     return true;
   }
 
-  async resolveSupportRequest(currentUser, requestId) {
+  async resolveSupportRequest(currentUser, requestId, client = {}) {
     this.findAccessibleRequest(currentUser, requestId);
 
     supportRepository.resolveRequest(requestId);
-    auditRepository.createLog(currentUser.id, 'resolve_support_request', JSON.stringify({ requestId, resolvedBy: currentUser.username }));
+    auditRepository.createLog(currentUser.id, 'resolve_support_request', JSON.stringify({ requestId, resolvedBy: currentUser.username }), client.ip, client.userAgent);
     return true;
   }
 

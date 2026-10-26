@@ -173,29 +173,29 @@ class PostService {
   }
 
   // Métodos de administración
-  async approvePost(adminUserId, postId) {
+  async approvePost(adminUserId, postId, client = {}) {
     const post = postRepository.findById(postId);
     if (!post) {
       throw new NotFoundError('Post no encontrado');
     }
 
     postRepository.approvePost(postId);
-    auditRepository.createLog(adminUserId, 'approve_post', JSON.stringify({ postId }));
+    auditRepository.createLog(adminUserId, 'approve_post', JSON.stringify({ postId }), client.ip, client.userAgent);
     return true;
   }
 
-  async rejectPost(adminUserId, postId) {
+  async rejectPost(adminUserId, postId, client = {}) {
     const post = postRepository.findById(postId);
     if (!post) {
       throw new NotFoundError('Post no encontrado');
     }
 
     postRepository.rejectPost(postId);
-    auditRepository.createLog(adminUserId, 'reject_post', JSON.stringify({ postId }));
+    auditRepository.createLog(adminUserId, 'reject_post', JSON.stringify({ postId }), client.ip, client.userAgent);
     return true;
   }
 
-  async editPostAdmin(adminUserId, postId, data) {
+  async editPostAdmin(adminUserId, postId, data, client = {}) {
     const post = postRepository.findById(postId);
     if (!post) {
       throw new NotFoundError('Post no encontrado');
@@ -208,7 +208,7 @@ class PostService {
     const cleanBody = sanitizeText(body.trim());
 
     postRepository.updatePost(postId, cleanTitle, cleanBody);
-    auditRepository.createLog(adminUserId, 'edit_post', JSON.stringify({ postId, title: cleanTitle, body: cleanBody }));
+    auditRepository.createLog(adminUserId, 'edit_post', JSON.stringify({ postId, title: cleanTitle, body: cleanBody }), client.ip, client.userAgent);
     return true;
   }
 }

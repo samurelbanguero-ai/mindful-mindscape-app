@@ -778,6 +778,8 @@ export function Panel() {
                       <TableHead>Usuario ID</TableHead>
                       <TableHead>Acción</TableHead>
                       <TableHead>Detalles</TableHead>
+                      <TableHead>IP</TableHead>
+                      <TableHead>Navegador</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody className="text-xs">
@@ -791,6 +793,10 @@ export function Panel() {
                           </span>
                         </TableCell>
                         <TableCell>{log.details}</TableCell>
+                        <TableCell className="font-mono text-[10px] text-muted-foreground">{log.ip || "—"}</TableCell>
+                        <TableCell className="max-w-[180px] truncate text-[10px] text-muted-foreground" title={log.user_agent || ""}>
+                          {log.user_agent || "—"}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

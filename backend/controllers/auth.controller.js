@@ -1,13 +1,13 @@
 const authService = require('../services/auth.service');
 const authDTO = require('../dto/auth.dto');
 const { sendSuccess } = require('../responses/success');
+const { getClientInfo } = require('../utils/request');
 const { ValidationError } = require('../exceptions/ValidationError');
 
 class AuthController {
   async register(req, res, next) {
     try {
-      const ip = req.ip || req.socket?.remoteAddress || '';
-      const userAgent = req.headers['user-agent'] || '';
+      const { ip, userAgent } = getClientInfo(req);
 
       const user = await authService.register(req.body, ip, userAgent);
       return sendSuccess(res, {
@@ -21,8 +21,7 @@ class AuthController {
 
   async createPsychologist(req, res, next) {
     try {
-      const ip = req.ip || req.socket?.remoteAddress || '';
-      const userAgent = req.headers['user-agent'] || '';
+      const { ip, userAgent } = getClientInfo(req);
 
       const user = await authService.createPsychologist(req.body, ip, userAgent);
       return sendSuccess(res, {
@@ -36,8 +35,7 @@ class AuthController {
 
   async createUserAdmin(req, res, next) {
     try {
-      const ip = req.ip || req.socket?.remoteAddress || '';
-      const userAgent = req.headers['user-agent'] || '';
+      const { ip, userAgent } = getClientInfo(req);
 
       const user = await authService.createUserAdmin(req.body, ip, userAgent);
       return sendSuccess(res, {
@@ -52,8 +50,7 @@ class AuthController {
   async verifyEmail(req, res, next) {
     try {
       const { email, code } = req.body;
-      const ip = req.ip || req.socket?.remoteAddress || '';
-      const userAgent = req.headers['user-agent'] || '';
+      const { ip, userAgent } = getClientInfo(req);
 
       await authService.verifyEmail(email, code, ip, userAgent);
       return sendSuccess(res, { message: 'Cuenta verificada con éxito. Ya puedes iniciar sesión.' }, 200);
@@ -65,8 +62,7 @@ class AuthController {
   async resendVerification(req, res, next) {
     try {
       const { email } = req.body;
-      const ip = req.ip || req.socket?.remoteAddress || '';
-      const userAgent = req.headers['user-agent'] || '';
+      const { ip, userAgent } = getClientInfo(req);
 
       await authService.resendVerification(email, ip, userAgent);
       return sendSuccess(res, { message: 'Código de verificación reenviado.' }, 200);
@@ -77,8 +73,7 @@ class AuthController {
 
   async login(req, res, next) {
     try {
-      const ip = req.ip || req.socket?.remoteAddress || '';
-      const userAgent = req.headers['user-agent'] || '';
+      const { ip, userAgent } = getClientInfo(req);
 
       const { user, accessToken, refreshToken } = await authService.login(req.body, ip, userAgent);
 
@@ -102,8 +97,7 @@ class AuthController {
     try {
       // Extraer el refresh token de la cookie
       const token = req.cookies?.refreshToken;
-      const ip = req.ip || req.socket?.remoteAddress || '';
-      const userAgent = req.headers['user-agent'] || '';
+      const { ip, userAgent } = getClientInfo(req);
 
       const { accessToken, refreshToken: newRefreshToken } = await authService.refreshToken(token, ip, userAgent);
 
@@ -125,8 +119,7 @@ class AuthController {
   async logout(req, res, next) {
     try {
       const token = req.cookies?.refreshToken;
-      const ip = req.ip || req.socket?.remoteAddress || '';
-      const userAgent = req.headers['user-agent'] || '';
+      const { ip, userAgent } = getClientInfo(req);
 
       await authService.logout(token, ip, userAgent);
 
@@ -147,8 +140,7 @@ class AuthController {
   async logoutAll(req, res, next) {
     try {
       const userId = req.user.id;
-      const ip = req.ip || req.socket?.remoteAddress || '';
-      const userAgent = req.headers['user-agent'] || '';
+      const { ip, userAgent } = getClientInfo(req);
 
       await authService.logoutAll(userId, ip, userAgent);
 
@@ -169,8 +161,7 @@ class AuthController {
   async recoverPassword(req, res, next) {
     try {
       const { email } = req.body;
-      const ip = req.ip || req.socket?.remoteAddress || '';
-      const userAgent = req.headers['user-agent'] || '';
+      const { ip, userAgent } = getClientInfo(req);
 
       const result = await authService.recoverPassword(email, ip, userAgent);
       return sendSuccess(res, result, 200);
@@ -182,8 +173,7 @@ class AuthController {
   async resetPassword(req, res, next) {
     try {
       const { email, token, password } = req.body;
-      const ip = req.ip || req.socket?.remoteAddress || '';
-      const userAgent = req.headers['user-agent'] || '';
+      const { ip, userAgent } = getClientInfo(req);
 
       await authService.resetPassword(email, token, password, ip, userAgent);
       return sendSuccess(res, { message: 'Contraseña restablecida con éxito. Ya puedes iniciar sesión.' }, 200);

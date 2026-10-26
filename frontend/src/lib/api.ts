@@ -334,6 +334,8 @@ export interface AuditLog {
   created_at: string;
   username: string;
   role: string;
+  ip: string | null;
+  user_agent: string | null;
 }
 
 export const support = {

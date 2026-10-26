@@ -5,6 +5,11 @@ const corsConfig = require('./cors');
 const securityConfig = require('./security');
 
 function configureExpress(app) {
+  // Confiar en X-Forwarded-For solo si la petición viene de una red privada
+  // (el proxy de Vite en la red de Docker). Así req.ip es la IP real del cliente
+  // para auditoría y límites de peticiones, sin que alguien de internet pueda falsearla.
+  app.set('trust proxy', 'loopback, linklocal, uniquelocal');
+
   // Inyectar parser de cabeceras seguras (Helmet)
   app.use(helmet(securityConfig.helmetOptions));
 

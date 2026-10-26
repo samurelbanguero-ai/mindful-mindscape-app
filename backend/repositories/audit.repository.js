@@ -1,11 +1,11 @@
 const db = require('../database/connection');
 
 class AuditRepository {
-  createLog(userId, action, details) {
+  createLog(userId, action, details, ip = null, userAgent = null) {
     db.prepare(`
-      INSERT INTO audit_logs (user_id, action, details)
-      VALUES (?, ?, ?)
-    `).run(userId, action, details);
+      INSERT INTO audit_logs (user_id, action, details, ip, user_agent)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(userId, action, details, ip || null, userAgent || null);
     return true;
   }
 

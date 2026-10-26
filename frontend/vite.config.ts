@@ -25,6 +25,8 @@ export default defineConfig({
         "/api": {
           target: backendTarget,
           changeOrigin: true,
+          // Reenvía la IP real del navegador (X-Forwarded-For) para auditoría y límites
+          xfwd: true,
         },
       },
     },
