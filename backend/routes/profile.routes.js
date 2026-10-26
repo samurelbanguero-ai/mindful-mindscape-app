@@ -4,7 +4,8 @@ const authMiddleware = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
-router.get('/:userId', profileController.getProfile);
+// Perfil de otra persona: requiere sesión y solo devuelve campos públicos
+router.get('/:userId', authMiddleware, profileController.getProfile);
 router.put('/account', authMiddleware, profileController.updateAccount);
 router.put('/', authMiddleware, profileController.updateProfile);
 

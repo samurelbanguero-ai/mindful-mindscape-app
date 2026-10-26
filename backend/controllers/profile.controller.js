@@ -4,6 +4,7 @@ const NotFoundError = require('../exceptions/NotFoundError');
 const ValidationError = require('../exceptions/ValidationError');
 const { sendSuccess } = require('../responses/success');
 const { sanitizeText } = require('../utils/sanitizer');
+const { toPublicProfile } = require('../shared/helpers');
 
 class ProfileController {
   async getProfile(req, res, next) {
@@ -15,8 +16,7 @@ class ProfileController {
         throw new NotFoundError('Usuario no encontrado');
       }
 
-      const responseData = authDTO.toUserResponse(user);
-      return sendSuccess(res, responseData, 200);
+      return sendSuccess(res, { user: toPublicProfile(user) }, 200);
     } catch (err) {
       next(err);
     }
