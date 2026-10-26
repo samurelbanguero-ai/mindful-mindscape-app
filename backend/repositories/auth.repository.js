@@ -46,10 +46,6 @@ class AuthRepository {
     return true;
   }
 
-  findResetRecordByTokenHash(tokenHash) {
-    return db.prepare('SELECT * FROM password_resets WHERE token_hash = ?').get(tokenHash);
-  }
-
   findResetRecordByUserId(userId) {
     return db.prepare('SELECT * FROM password_resets WHERE user_id = ?').get(userId);
   }

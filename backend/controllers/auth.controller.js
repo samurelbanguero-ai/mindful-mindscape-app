@@ -11,7 +11,6 @@ const REFRESH_COOKIE_OPTIONS = {
   domain: process.env.COOKIE_DOMAIN || undefined
 };
 const REFRESH_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 días
-const { ValidationError } = require('../exceptions/ValidationError');
 
 class AuthController {
   async register(req, res, next) {

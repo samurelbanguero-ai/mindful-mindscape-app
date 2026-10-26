@@ -1,11 +1,10 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const env = require('../config/env');
-const jwtConfig = require('../config/jwt');
 
 function generateAccessToken(userId) {
   const expires = process.env.ACCESS_TOKEN_EXPIRES || '15m';
-  return jwt.sign({ id: userId }, jwtConfig.secret, { expiresIn: expires });
+  return jwt.sign({ id: userId }, env.JWT_SECRET, { expiresIn: expires });
 }
 
 function generateRefreshToken() {

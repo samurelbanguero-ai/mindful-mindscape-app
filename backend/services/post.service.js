@@ -4,7 +4,6 @@ const postValidator = require('../validators/post.validator');
 const NotFoundError = require('../exceptions/NotFoundError');
 const ValidationError = require('../exceptions/ValidationError');
 const { sanitizeText } = require('../utils/sanitizer');
-const { BAD_WORDS_REGEX } = require('../shared/regex');
 const moderatorService = require('./moderator.service');
 const postDTO = require('../dto/post.dto');
 

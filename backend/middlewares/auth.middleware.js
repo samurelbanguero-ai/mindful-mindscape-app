@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const jwtConfig = require('../config/jwt');
+const env = require('../config/env');
 const userRepository = require('../repositories/user.repository');
 const UnauthorizedError = require('../exceptions/UnauthorizedError');
 
@@ -12,7 +12,7 @@ function authMiddleware(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, jwtConfig.secret);
+    const decoded = jwt.verify(token, env.JWT_SECRET);
     const user = userRepository.findById(decoded.id);
 
     if (!user) {
