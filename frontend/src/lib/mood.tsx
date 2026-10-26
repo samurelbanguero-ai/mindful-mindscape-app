@@ -83,6 +83,8 @@ export type User = {
   bio?: string;
   avatar?: string;
   anonymous: boolean; // legacy
+  /** Preferencias del perfil guardadas en el servidor (intereses, Spotify, color…) */
+  profile_data?: Partial<Profile>;
 };
 
 export type Profile = {
