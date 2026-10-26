@@ -1,28 +1,15 @@
 // Lógica pura (sin base de datos) que traduce el diario emocional a las
 // variables de entrada del modelo de ansiedad.
 
+const { ANXIETY_WEIGHTS } = require('./emotions');
+
 const WINDOW_DAYS = 14;
 const MIN_ENTRIES = 3;
 
-/**
- * Peso de cada emoción del diario sobre las 3 variables del modelo
- * (stress, panic_attacks, depression), entre 0 y 1. Las emociones agradables
- * o neutras no aportan carga y diluyen el promedio. Los `id` coinciden con
- * `MOODS` en frontend/src/lib/mood.tsx.
- */
-const MOOD_WEIGHTS = {
-  ansiedad:     { stress: 0.6, panic_attacks: 1.0, depression: 0.2 },
-  miedo:        { stress: 0.5, panic_attacks: 0.9, depression: 0.2 },
-  preocupacion: { stress: 0.8, panic_attacks: 0.4, depression: 0.2 },
-  confusion:    { stress: 0.4, panic_attacks: 0.2, depression: 0.2 },
-  frustracion:  { stress: 0.9, panic_attacks: 0.1, depression: 0.3 },
-  enojo:        { stress: 0.8, panic_attacks: 0.1, depression: 0.2 },
-  cansancio:    { stress: 0.5, panic_attacks: 0.0, depression: 0.6 },
-  tristeza:     { stress: 0.2, panic_attacks: 0.1, depression: 1.0 },
-  soledad:      { stress: 0.2, panic_attacks: 0.1, depression: 0.9 },
-  mixto:        { stress: 0.3, panic_attacks: 0.1, depression: 0.3 },
-  aburrimiento: { stress: 0.0, panic_attacks: 0.0, depression: 0.3 }
-};
+// Peso de cada emoción sobre las 3 variables del modelo (stress, panic_attacks,
+// depression), entre 0 y 1. Viven en el catálogo único (pesosAnsiedad); las
+// emociones agradables o neutras no aportan carga y diluyen el promedio.
+const MOOD_WEIGHTS = ANXIETY_WEIGHTS;
 
 const FEATURES = ['stress', 'panic_attacks', 'depression'];
 

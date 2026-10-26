@@ -11,12 +11,15 @@ import {
 import * as api from "./api";
 import { toast } from "sonner";
 
+import catalogo from "../../../shared/emotions.json";
+
 export type Mood = string;
 export type Role = "usuario" | "psicologo" | "admin";
 export type Visibility = "publico" | "alias" | "anonimo";
 
 export type ParentMood = "calma" | "alegria" | "tristeza" | "ansiedad" | "energia";
 
+// Emociones del registro, desde el catálogo único (shared/emotions.json)
 export const MOODS: {
   id: string;
   label: string;
@@ -25,220 +28,15 @@ export const MOODS: {
   score: number;
   category: "positiva" | "negativa" | "neutra";
   parentMood: ParentMood;
-}[] = [
-  // Positivas
-  {
-    id: "alegria",
-    label: "Alegría",
-    emoji: "☀️",
-    description: "Me siento feliz, optimista",
-    score: 5,
-    category: "positiva",
-    parentMood: "alegria",
-  },
-  {
-    id: "felicidad",
-    label: "Felicidad",
-    emoji: "😊",
-    description: "Plenitud y bienestar",
-    score: 5,
-    category: "positiva",
-    parentMood: "alegria",
-  },
-  {
-    id: "gratitud",
-    label: "Gratitud",
-    emoji: "🙏",
-    description: "Agradecido/a con la vida",
-    score: 5,
-    category: "positiva",
-    parentMood: "alegria",
-  },
-  {
-    id: "amor",
-    label: "Amor",
-    emoji: "❤️",
-    description: "Afectuoso/a, conectado/a",
-    score: 5,
-    category: "positiva",
-    parentMood: "alegria",
-  },
-  {
-    id: "entusiasmo",
-    label: "Entusiasmo",
-    emoji: "🎉",
-    description: "Emocionado/a por lo que viene",
-    score: 5,
-    category: "positiva",
-    parentMood: "alegria",
-  },
-  {
-    id: "orgullo",
-    label: "Orgullo",
-    emoji: "✨",
-    description: "Satisfecho/a de mis logros",
-    score: 5,
-    category: "positiva",
-    parentMood: "alegria",
-  },
-  {
-    id: "esperanza",
-    label: "Esperanza",
-    emoji: "🌱",
-    description: "Fe en el futuro",
-    score: 4,
-    category: "positiva",
-    parentMood: "alegria",
-  },
-  {
-    id: "energia",
-    label: "Energía",
-    emoji: "🔥",
-    description: "Con ganas y vitalidad",
-    score: 4,
-    category: "positiva",
-    parentMood: "energia",
-  },
-  {
-    id: "motivacion",
-    label: "Motivación",
-    emoji: "💪",
-    description: "Listo/a para actuar",
-    score: 4,
-    category: "positiva",
-    parentMood: "energia",
-  },
-  {
-    id: "alivio",
-    label: "Alivio",
-    emoji: "😌",
-    description: "Me he quitado un peso de encima",
-    score: 4,
-    category: "positiva",
-    parentMood: "calma",
-  },
-
-  // Neutras
-  {
-    id: "calma",
-    label: "Calma",
-    emoji: "🌿",
-    description: "Tranquilo/a, en paz",
-    score: 3,
-    category: "neutra",
-    parentMood: "calma",
-  },
-  {
-    id: "paz",
-    label: "Paz",
-    emoji: "☮️",
-    description: "Serenidad interna",
-    score: 3,
-    category: "neutra",
-    parentMood: "calma",
-  },
-  {
-    id: "mixto",
-    label: "Emoción Mixta",
-    emoji: "🎭",
-    description: "Siento varias cosas a la vez",
-    score: 3,
-    category: "neutra",
-    parentMood: "calma",
-  },
-  {
-    id: "confusion",
-    label: "Confusión",
-    emoji: "❓",
-    description: "No tengo claro qué siento",
-    score: 3,
-    category: "neutra",
-    parentMood: "ansiedad",
-  },
-  {
-    id: "aburrimiento",
-    label: "Aburrimiento",
-    emoji: "🥱",
-    description: "Poco interés o estímulo",
-    score: 3,
-    category: "neutra",
-    parentMood: "calma",
-  },
-
-  // Negativas
-  {
-    id: "ansiedad",
-    label: "Ansiedad",
-    emoji: "🌫️",
-    description: "Inquieto/a, con presión",
-    score: 2,
-    category: "negativa",
-    parentMood: "ansiedad",
-  },
-  {
-    id: "preocupacion",
-    label: "Preocupación",
-    emoji: "😟",
-    description: "Pensando en problemas",
-    score: 2,
-    category: "negativa",
-    parentMood: "ansiedad",
-  },
-  {
-    id: "miedo",
-    label: "Miedo",
-    emoji: "😨",
-    description: "Temor a algo",
-    score: 2,
-    category: "negativa",
-    parentMood: "ansiedad",
-  },
-  {
-    id: "tristeza",
-    label: "Tristeza",
-    emoji: "🌧️",
-    description: "Bajo/a, sensible",
-    score: 1,
-    category: "negativa",
-    parentMood: "tristeza",
-  },
-  {
-    id: "cansancio",
-    label: "Cansancio",
-    emoji: "💤",
-    description: "Sin energía física o mental",
-    score: 2,
-    category: "negativa",
-    parentMood: "tristeza",
-  },
-  {
-    id: "frustracion",
-    label: "Frustración",
-    emoji: "😤",
-    description: "Impotencia ante algo",
-    score: 2,
-    category: "negativa",
-    parentMood: "energia",
-  },
-  {
-    id: "enojo",
-    label: "Enojo",
-    emoji: "😡",
-    description: "Molesto/a o furioso/a",
-    score: 1,
-    category: "negativa",
-    parentMood: "energia",
-  },
-  {
-    id: "soledad",
-    label: "Soledad",
-    emoji: "👥",
-    description: "Me siento aislado/a o solo/a",
-    score: 1,
-    category: "negativa",
-    parentMood: "tristeza",
-  },
-];
+}[] = catalogo.emociones.map((e) => ({
+  id: e.id,
+  label: e.nombre,
+  emoji: e.emoji,
+  description: e.descripcionCorta,
+  score: e.puntaje,
+  category: e.categoria as "positiva" | "negativa" | "neutra",
+  parentMood: e.emocionPadre as ParentMood,
+}));
 
 export function getParentMood(m: string): ParentMood {
   const found = MOODS.find((x) => x.id === m);

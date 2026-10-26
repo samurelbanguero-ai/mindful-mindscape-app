@@ -1,6 +1,7 @@
 const { BAD_WORDS_REGEX } = require('../shared/regex');
 const claudeClient = require('../integrations/claude/claude.client');
 const logger = require('../utils/logger');
+const { NEGATIVE_EMOTION_IDS } = require('../shared/emotions');
 
 // Frases y patrones comunes que indican acoso, toxicidad o desprecio en un entorno de salud mental
 const TOXIC_PHRASES = [
@@ -37,11 +38,8 @@ const TOXIC_PHRASES = [
   /\bjódete\b/i
 ];
 
-// Emociones y estados negativos para el filtro contextual
-const NEGATIVE_MOODS = new Set([
-  'ansiedad', 'preocupacion', 'miedo', 'tristeza', 'cansancio', 'frustracion', 'enojo', 'soledad',
-  'inquieto', 'cansado', 'triste', 'molesto', 'solo'
-]);
+// Emociones negativas del catálogo único, para el filtro contextual
+const NEGATIVE_MOODS = NEGATIVE_EMOTION_IDS;
 
 // Respuestas cortas insensibles comunes
 const SHORT_INSENSITIVE_PATTERNS = [
