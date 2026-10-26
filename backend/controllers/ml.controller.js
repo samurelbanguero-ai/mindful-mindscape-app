@@ -24,7 +24,7 @@ class MlController {
   async getRequestAnxiety(req, res, next) {
     try {
       const requestId = Number(req.params.requestId);
-      const estimate = await anxietyService.estimateForSupportRequest(requestId, resolveToday(req.query));
+      const estimate = await anxietyService.estimateForSupportRequest(req.user, requestId, resolveToday(req.query));
       return sendSuccess(res, estimate, 200);
     } catch (err) {
       next(err);

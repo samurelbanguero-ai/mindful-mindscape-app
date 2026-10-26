@@ -48,6 +48,16 @@ class SupportController {
     }
   }
 
+  async claimRequest(req, res, next) {
+    try {
+      const requestId = Number(req.params.id);
+      const request = await supportService.claimRequest(req.user, requestId);
+      return sendSuccess(res, { success: true, request: supportDTO.toRequestResponse(request).request }, 200);
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async getRequestMessages(req, res, next) {
     try {
       const requestId = Number(req.params.id);

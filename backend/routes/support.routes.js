@@ -10,6 +10,7 @@ router.use(authMiddleware);
 router.post('/request', supportController.requestSupport);
 router.get('/request/me', supportController.getMyRequest);
 router.get('/requests', professionalOnly, supportController.getAllRequests);
+router.post('/requests/:id/claim', professionalOnly, supportController.claimRequest);
 router.get('/requests/:id/messages', supportController.getRequestMessages);
 router.post('/requests/:id/messages', supportController.sendSupportMessage);
 router.post('/requests/:id/resolve', supportController.resolveSupportRequest);

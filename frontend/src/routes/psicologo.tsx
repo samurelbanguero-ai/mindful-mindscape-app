@@ -252,6 +252,26 @@ export function Panel() {
   };
 
   // Resolver ticket de soporte
+  // Caso pendiente que nadie ha tomado: el psicólogo ve solo alias, fecha y motivo
+  const isQueued = (r: SupportRequest) => !isAdmin && r.psychologist_id == null && r.status === "pending";
+
+  const patientName = (r: SupportRequest) => {
+    if (isQueued(r)) return r.alias ? `Estudiante (${r.alias})` : "Estudiante";
+    return r.visibility === "anonimo" ? `Anónimo/a (${r.alias || "Paciente"})` : r.username;
+  };
+
+  const handleClaimRequest = async () => {
+    if (!selectedReq) return;
+    try {
+      await supportApi.claimRequest(selectedReq.id);
+      toast.success("Tomaste el caso. Ya puedes ver la conversación.");
+      await loadRequests();
+    } catch (err: any) {
+      toast.error(err.message || "No se pudo tomar el caso");
+      await loadRequests();
+    }
+  };
+
   const handleResolveRequest = async () => {
     if (!selectedReq) return;
     try {
@@ -471,7 +491,12 @@ export function Panel() {
                     >
                       <div className="flex justify-between items-start mb-2">
                         <span className="font-semibold text-xs text-foreground/90">
-                          {r.visibility === "anonimo" ? `Anónimo/a (${r.alias || "Paciente"})` : r.username}
+                          {patientName(r)}
+                          {isQueued(r) && (
+                            <span className="ml-1.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700">
+                              Sin asignar
+                            </span>
+                          )}
                         </span>
                         <span className="text-[10px] text-muted-foreground">{formattedDate(r.created_at)}</span>
                       </div>
@@ -493,11 +518,13 @@ export function Panel() {
                     <div className="flex justify-between items-center border-b border-border/40 pb-3 mb-3 text-xs shrink-0">
                       <div>
                         <span className="font-bold text-sm block text-foreground/90">
-                          Paciente: {selectedReq.visibility === "anonimo" ? `Anónimo/a (${selectedReq.alias || "Paciente"})` : selectedReq.username}
+                          Paciente: {patientName(selectedReq)}
                         </span>
-                        <span className="text-[10px] text-muted-foreground">ID: {selectedReq.user_id}</span>
+                        {selectedReq.user_id != null && (
+                          <span className="text-[10px] text-muted-foreground">ID: {selectedReq.user_id}</span>
+                        )}
                       </div>
-                      {selectedReq.status !== "resolved" && (
+                      {selectedReq.status !== "resolved" && !isQueued(selectedReq) && (
                         <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 text-xs rounded-full px-3" onClick={handleResolveRequest}>
                           Marcar resuelta
                         </Button>
@@ -510,7 +537,19 @@ export function Panel() {
                         {selectedReq.message}
                       </div>
 
-                      {selectedReq.share_journal === 1 && (
+                      {isQueued(selectedReq) && (
+                        <div className="border border-amber-500/20 bg-amber-500/5 rounded-2xl p-4 text-xs space-y-3">
+                          <p className="text-foreground/80">
+                            Este caso todavía no tiene psicólogo asignado. Al tomarlo quedará a tu cargo y podrás ver la
+                            conversación{selectedReq.share_journal === 1 ? " y el diario que el estudiante compartió" : ""}.
+                          </p>
+                          <Button size="sm" className="rounded-full" onClick={handleClaimRequest}>
+                            Tomar caso
+                          </Button>
+                        </div>
+                      )}
+
+                      {selectedReq.share_journal === 1 && !isQueued(selectedReq) && (
                         <AnxietyIndicator requestId={selectedReq.id} refreshKey={selectedReq.journal_entries?.length} compact />
                       )}
 
@@ -542,7 +581,7 @@ export function Panel() {
                       </div>
                     </div>
 
-                    {selectedReq.status !== "resolved" ? (
+                    {isQueued(selectedReq) ? null : selectedReq.status !== "resolved" ? (
                       <form onSubmit={handleSendMessage} className="mt-4 flex gap-2 shrink-0">
                         <input
                           type="text"

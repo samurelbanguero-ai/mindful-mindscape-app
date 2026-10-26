@@ -41,7 +41,11 @@ class SupportRepository {
     `).all(requestId);
   }
 
-  findAllRequests(statusFilter = '', search = '') {
+  /**
+   * @param {number|null} psychologistId si se indica, solo los casos asignados a ese
+   *   psicólogo y los pendientes sin asignar; null = todos (administrador).
+   */
+  findAllRequests(statusFilter = '', search = '', psychologistId = null) {
     let query = `
       SELECT r.*, u.username, u.alias, u.visibility, u.name AS user_name
       FROM support_requests r
@@ -50,23 +54,38 @@ class SupportRepository {
     `;
     const params = [];
 
+    if (psychologistId !== null) {
+      query += " AND (r.psychologist_id = ? OR (r.psychologist_id IS NULL AND r.status = 'pending'))";
+      params.push(psychologistId);
+    }
+
     if (statusFilter) {
       query += " AND r.status = ?";
       params.push(statusFilter);
     }
     if (search) {
+      // Un psicólogo solo busca por nombre dentro de sus casos: buscar en la cola
+      // de pendientes permitiría deducir quién pidió apoyo.
       query += " AND (u.username LIKE ? OR u.alias LIKE ? OR u.name LIKE ?)";
       const likeVal = `%${search}%`;
       params.push(likeVal, likeVal, likeVal);
+      if (psychologistId !== null) {
+        query += " AND r.psychologist_id = ?";
+        params.push(psychologistId);
+      }
     }
 
     query += " ORDER BY r.created_at DESC";
     return db.prepare(query).all(...params);
   }
 
-  assignPsychologist(requestId, psychologistId) {
-    db.prepare("UPDATE support_requests SET psychologist_id = ?, status = 'active' WHERE id = ?").run(psychologistId, requestId);
-    return true;
+  /** Devuelve true solo si este psicólogo tomó el caso (nadie lo había tomado antes). */
+  claimRequest(requestId, psychologistId) {
+    const result = db.prepare(`
+      UPDATE support_requests SET psychologist_id = ?, status = 'active'
+      WHERE id = ? AND psychologist_id IS NULL AND status = 'pending'
+    `).run(psychologistId, requestId);
+    return result.changes === 1;
   }
 
   resolveRequest(requestId) {
@@ -74,13 +93,16 @@ class SupportRepository {
     return true;
   }
 
-  getUnreadCountPro() {
+  /** Mensajes de pacientes sin leer: de los casos del psicólogo indicado, o de todos si es null. */
+  getUnreadCountPro(psychologistId = null) {
+    const byPsychologist = psychologistId !== null ? 'AND r.psychologist_id = ?' : '';
+    const params = psychologistId !== null ? [psychologistId] : [];
     return db.prepare(`
       SELECT COUNT(*) AS count
       FROM support_messages m
       JOIN support_requests r ON r.id = m.request_id
-      WHERE m.sender_id = r.user_id AND m.is_read = 0 AND r.status != 'resolved'
-    `).get().count;
+      WHERE m.sender_id = r.user_id AND m.is_read = 0 AND r.status != 'resolved' ${byPsychologist}
+    `).get(...params).count;
   }
 
   getUnreadCountUser(userId) {

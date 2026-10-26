@@ -11,6 +11,7 @@ const {
   buildFeatures,
   trendBetween
 } = require('../shared/anxiety-features');
+const { canAccessRequest } = require('../shared/support-permissions');
 
 const DISCLAIMER = 'Estimación orientativa generada por un modelo estadístico a partir de tus registros. No es un diagnóstico clínico.';
 
@@ -51,11 +52,14 @@ class AnxietyService {
     };
   }
 
-  /** Estimación de un paciente para el profesional, solo si compartió su diario. */
-  async estimateForSupportRequest(requestId, today) {
+  /** Estimación de un paciente para su psicólogo asignado (o un admin), solo si compartió su diario. */
+  async estimateForSupportRequest(currentUser, requestId, today) {
     const request = supportRepository.findRequestById(requestId);
     if (!request) {
       throw new NotFoundError('Solicitud no encontrada');
+    }
+    if (!canAccessRequest(currentUser, request)) {
+      throw new AppError('No tienes acceso a este caso de apoyo.', 403);
     }
     if (request.share_journal !== 1) {
       throw new AppError('El paciente no compartió su diario en esta solicitud', 403);

@@ -4,8 +4,11 @@ const diaryRepository = require('../repositories/diary.repository');
 const supportValidator = require('../validators/support.validator');
 const ValidationError = require('../exceptions/ValidationError');
 const NotFoundError = require('../exceptions/NotFoundError');
-const UnauthorizedError = require('../exceptions/UnauthorizedError');
+const AppError = require('../exceptions/AppError');
 const { sanitizeText } = require('../utils/sanitizer');
+const { canAccessRequest, canClaimRequest, isUnassignedPending } = require('../shared/support-permissions');
+
+const ACCESS_DENIED = 'No tienes acceso a este caso de apoyo.';
 
 class SupportService {
   async requestSupport(userId, data) {
@@ -44,33 +47,48 @@ class SupportService {
     return { request, messages };
   }
 
+  /**
+   * Admin: todos los casos. Psicólogo: sus casos asignados (completos) y la cola
+   * de pendientes sin asignar, con datos mínimos (sin mensajes, diario ni identidad).
+   */
   async getAllRequests(currentUser, statusFilter, search) {
-    const requests = supportRepository.findAllRequests(statusFilter, search);
+    const psychologistId = currentUser.role === 'admin' ? null : currentUser.id;
+    const requests = supportRepository.findAllRequests(statusFilter, search, psychologistId);
 
-    for (const r of requests) {
-      r.messages = supportRepository.findRequestMessages(r.id);
-
-      if (r.share_journal === 1) {
-        r.journal_entries = diaryRepository.findAllByUserId(r.user_id, 5);
-      } else {
-        r.journal_entries = [];
+    return requests.map(r => {
+      if (!canAccessRequest(currentUser, r)) {
+        return {
+          ...r,
+          user_id: null,
+          username: null,
+          user_name: null,
+          alias: r.visibility === 'publico' ? null : r.alias,
+          messages: [],
+          journal_entries: []
+        };
       }
-    }
 
-    return requests;
+      return {
+        ...r,
+        messages: supportRepository.findRequestMessages(r.id),
+        journal_entries: r.share_journal === 1 ? diaryRepository.findAllByUserId(r.user_id, 5) : []
+      };
+    });
   }
 
-  async getRequestMessages(currentUser, requestId) {
+  findAccessibleRequest(currentUser, requestId) {
     const request = supportRepository.findRequestById(requestId);
     if (!request) {
       throw new NotFoundError('Solicitud no encontrada');
     }
-
-    const isOwner = request.user_id === currentUser.id;
-    const isPro = currentUser.role === 'psicologo' || currentUser.role === 'admin';
-    if (!isOwner && !isPro) {
-      throw new UnauthorizedError('Acceso denegado');
+    if (!canAccessRequest(currentUser, request)) {
+      throw new AppError(ACCESS_DENIED, 403);
     }
+    return request;
+  }
+
+  async getRequestMessages(currentUser, requestId) {
+    this.findAccessibleRequest(currentUser, requestId);
 
     const messages = supportRepository.findRequestMessages(requestId);
     supportRepository.markMessagesAsRead(requestId, currentUser.id);
@@ -78,45 +96,48 @@ class SupportService {
     return messages;
   }
 
-  async sendSupportMessage(currentUser, requestId, data) {
+  /** Asigna el caso al profesional; atómico para que dos psicólogos no tomen el mismo caso. */
+  async claimRequest(currentUser, requestId) {
     const request = supportRepository.findRequestById(requestId);
     if (!request) {
       throw new NotFoundError('Solicitud no encontrada');
     }
+    if (!canClaimRequest(currentUser, request)) {
+      throw new AppError('Este caso ya fue tomado por otro profesional o no está pendiente.', 409);
+    }
+    if (!supportRepository.claimRequest(requestId, currentUser.id)) {
+      throw new AppError('Este caso ya fue tomado por otro profesional.', 409);
+    }
 
-    const isOwner = request.user_id === currentUser.id;
-    const isPro = currentUser.role === 'psicologo' || currentUser.role === 'admin';
-    if (!isOwner && !isPro) {
-      throw new UnauthorizedError('Acceso denegado');
+    auditRepository.createLog(currentUser.id, 'claim_support_request', JSON.stringify({ requestId }));
+    return supportRepository.findRequestById(requestId);
+  }
+
+  async sendSupportMessage(currentUser, requestId, data) {
+    let request = supportRepository.findRequestById(requestId);
+    if (!request) {
+      throw new NotFoundError('Solicitud no encontrada');
+    }
+
+    // Responder un caso pendiente sin asignar equivale a tomarlo
+    if (isUnassignedPending(request) && canClaimRequest(currentUser, request)) {
+      request = await this.claimRequest(currentUser, requestId);
+    }
+
+    if (!canAccessRequest(currentUser, request)) {
+      throw new AppError(ACCESS_DENIED, 403);
     }
 
     const { message = '' } = data;
     supportValidator.validateMessage(message);
     const cleanMsg = sanitizeText(message.trim());
 
-    const transaction = supportRepository.getTransaction(() => {
-      // Si responde un profesional y está pendiente, cambiar estado a activo
-      if (isPro && request.status === 'pending') {
-        supportRepository.assignPsychologist(requestId, currentUser.id);
-      }
-      supportRepository.createMessage(requestId, currentUser.id, cleanMsg);
-    });
-
-    transaction();
+    supportRepository.createMessage(requestId, currentUser.id, cleanMsg);
     return true;
   }
 
   async resolveSupportRequest(currentUser, requestId) {
-    const request = supportRepository.findRequestById(requestId);
-    if (!request) {
-      throw new NotFoundError('Solicitud no encontrada');
-    }
-
-    const isOwner = request.user_id === currentUser.id;
-    const isPro = currentUser.role === 'psicologo' || currentUser.role === 'admin';
-    if (!isOwner && !isPro) {
-      throw new UnauthorizedError('Acceso denegado');
-    }
+    this.findAccessibleRequest(currentUser, requestId);
 
     supportRepository.resolveRequest(requestId);
     auditRepository.createLog(currentUser.id, 'resolve_support_request', JSON.stringify({ requestId, resolvedBy: currentUser.username }));
@@ -124,12 +145,13 @@ class SupportService {
   }
 
   async getUnreadCount(currentUser) {
-    const isPro = currentUser.role === 'psicologo' || currentUser.role === 'admin';
-    if (isPro) {
-      return supportRepository.getUnreadCountPro();
-    } else {
-      return supportRepository.getUnreadCountUser(currentUser.id);
+    if (currentUser.role === 'admin') {
+      return supportRepository.getUnreadCountPro(null);
     }
+    if (currentUser.role === 'psicologo') {
+      return supportRepository.getUnreadCountPro(currentUser.id);
+    }
+    return supportRepository.getUnreadCountUser(currentUser.id);
   }
 }
 

@@ -294,7 +294,8 @@ export const spotify = {
 // ─────────────────────────────────────────────
 export interface SupportRequest {
   id: number;
-  user_id: number;
+  /** null en la cola de casos sin asignar: el psicólogo no ve la identidad hasta tomar el caso */
+  user_id: number | null;
   psychologist_id: number | null;
   status: "pending" | "active" | "resolved";
   message: string;
@@ -345,6 +346,9 @@ export const support = {
 
   getAllRequests: (status = "", search = "") =>
     apiRequest(`/support/requests?status=${status}&search=${encodeURIComponent(search)}`),
+
+  claimRequest: (requestId: number | string) =>
+    apiRequest(`/support/requests/${requestId}/claim`, { method: "POST" }),
 
   getMessages: (requestId: number | string) =>
     apiRequest(`/support/requests/${requestId}/messages`),
