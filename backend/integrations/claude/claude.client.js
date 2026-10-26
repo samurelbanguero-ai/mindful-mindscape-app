@@ -1,5 +1,6 @@
 const env = require('../../config/env');
 const logger = require('../../utils/logger');
+const AppError = require('../../exceptions/AppError');
 
 class ClaudeClient {
   constructor() {
@@ -67,7 +68,7 @@ class ClaudeClient {
     }
 
     logger.error('Todos los modelos de Anthropic fallaron en chat.');
-    throw new Error('El asistente de IA no está disponible en este momento. Por favor intenta más tarde.');
+    throw new AppError('El asistente de IA no está disponible en este momento. Por favor intenta más tarde.', 503);
   }
 
   async helpbotChat(message, history = [], systemPrompt = '') {
@@ -122,7 +123,7 @@ class ClaudeClient {
     }
 
     logger.error('Todos los modelos de Anthropic fallaron en helpbotChat.', { error: lastError?.message });
-    throw new Error(`Error en la API de Anthropic (helpbot): ${lastError?.message}`);
+    throw new AppError('El asistente de ayuda no está disponible en este momento. Por favor intenta más tarde.', 503);
   }
 
   formatHistory(history, limit) {
