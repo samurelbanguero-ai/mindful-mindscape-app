@@ -721,57 +721,57 @@ function AppPage() {
                     </div>
 
                     {/* Wellness navigation tabs */}
-                    <div className="flex items-center space-x-1.5 p-1 bg-secondary/30 rounded-xl border border-border/40 mb-4 justify-between">
+                    <div className="grid grid-cols-4 gap-1 p-1 bg-secondary/30 rounded-xl border border-border/40 mb-4">
                       <button
                         onClick={() => setActiveTab("cita")}
-                        className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-medium transition-all cursor-pointer ${
+                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-lg text-[10px] font-medium transition-all cursor-pointer ${
                           activeTab === "cita"
                             ? "bg-card text-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                         title="Reflexión de autor"
                       >
-                        <BookHeart className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Cita</span>
+                        <BookHeart className="w-3.5 h-3.5 shrink-0" />
+                        <span className="max-w-full truncate">Cita</span>
                       </button>
                       
                       <button
                         onClick={() => setActiveTab("respirar")}
-                        className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-medium transition-all cursor-pointer ${
+                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-lg text-[10px] font-medium transition-all cursor-pointer ${
                           activeTab === "respirar"
                             ? "bg-card text-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                         title="Pausa de respiración"
                       >
-                        <Wind className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Respirar</span>
+                        <Wind className="w-3.5 h-3.5 shrink-0" />
+                        <span className="max-w-full truncate">Respirar</span>
                       </button>
 
                       <button
                         onClick={() => setActiveTab("musica")}
-                        className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-medium transition-all cursor-pointer ${
+                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-lg text-[10px] font-medium transition-all cursor-pointer ${
                           activeTab === "musica"
                             ? "bg-card text-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                         title="Música ambiental"
                       >
-                        <Music className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Música</span>
+                        <Music className="w-3.5 h-3.5 shrink-0" />
+                        <span className="max-w-full truncate">Música</span>
                       </button>
 
                       <button
                         onClick={() => setActiveTab("gratitud")}
-                        className={`flex-1 flex items-center justify-center space-x-1 py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-medium transition-all cursor-pointer ${
+                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-lg text-[10px] font-medium transition-all cursor-pointer ${
                           activeTab === "gratitud"
                             ? "bg-card text-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                         title="Semilla de gratitud"
                       >
-                        <Sprout className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Gratitud</span>
+                        <Sprout className="w-3.5 h-3.5 shrink-0" />
+                        <span className="max-w-full truncate">Gratitud</span>
                       </button>
                     </div>
 
@@ -933,7 +933,7 @@ function AppPage() {
                           <form onSubmit={handleGratitudeSubmit} className="space-y-3">
                             <div className="space-y-1.5">
                               <Label htmlFor="gratitude-input" className="text-[11px] text-muted-foreground">
-                                Escribe algo, por más pequeño que sea, por lo que estés agradecido hoy:
+                                Escribe algo, por más pequeño que sea, que quieras agradecer hoy:
                               </Label>
                               <Input
                                 id="gratitude-input"
