@@ -13,6 +13,24 @@
 
 ## Registro de incidentes
 
+### 2026-11-23 — Auditoría de seguridad y despliegue
+
+Hallazgos corregidos:
+
+| Problema | Riesgo | Corrección |
+|---|---|---|
+| Cambiar usuario o contraseña no pedía la contraseña actual y aceptaba contraseñas de 6 caracteres | Un token de acceso robado bastaba para quedarse con la cuenta | Se exige la contraseña actual, las mismas reglas que el registro, límite de intentos por usuario y se cierran las demás sesiones |
+| El servidor corría con `NODE_ENV=development` | CORS aceptaba cualquier origen con cookies y cada consulta SQL (con notas del diario) se imprimía en los logs | Producción por defecto en Docker; el log de SQL solo con `SQL_DEBUG=true`; CORS siempre con lista blanca |
+| Secretos JWT ausentes o débiles se reemplazaban en silencio por uno aleatorio | Todas las sesiones se cerraban en cada reinicio | En producción el arranque falla con un mensaje claro |
+| Puerto del backend (2122) publicado en toda la red | Cualquiera en la red podía falsear `X-Forwarded-For` y saltarse los límites de intentos | El backend ya no publica puerto; el proxy del frontend fija la IP real del cliente |
+| Frontend servido con el servidor de desarrollo de Vite (`allowedHosts: true`) | Expone código fuente y herramientas de desarrollo | Imagen de producción compilada, sin código fuente |
+| El sembrado del administrador buscaba también por usuario/correo | Una cuenta registrada con ese nombre podía convertirse en administradora | Solo actualiza una cuenta que ya sea admin; si hay conflicto no siembra |
+| Mapas de límite de peticiones sin limpieza | Crecimiento de memoria sin límite | Barrido periódico de ventanas vencidas |
+| `/auth/refresh-token` sin límite | Fuerza bruta sin freno | Límite de 60 cada 15 minutos por IP |
+| Respuestas y reacciones permitidas en publicaciones pendientes o rechazadas | Interacción con contenido moderado | Solo en publicaciones aprobadas |
+| Avatar pasado por `sanitizeText` y cuerpo limitado a 50 KB | La foto de perfil nunca se guardaba | Validación estricta (emoji, `https://` o PNG/JPEG/WebP pequeño) y la foto se reduce en el navegador |
+
+
 ### 2026-07 — API key de Anthropic expuesta en el repositorio público
 
 | Campo | Detalle |

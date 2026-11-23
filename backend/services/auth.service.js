@@ -13,6 +13,7 @@ const AppError = require('../exceptions/AppError');
 const { sanitizeText } = require('../utils/sanitizer');
 const { compareConstantTime, hashValue } = require('../shared/helpers');
 const { VALID_ROLES } = require('../shared/constants');
+const { USERNAME_REGEX } = require('../shared/regex');
 const { generateAccessToken, generateRefreshToken } = require('../utils/tokens');
 
 class AuthService {
@@ -219,6 +220,10 @@ class AuthService {
     const user = userRepository.findByEmailOrUsername(cleanEmail, email.trim());
     if (!user) {
       throw new ValidationError('Usuario no encontrado');
+    }
+
+    if (user.email_verified === 1) {
+      throw new ValidationError('Esta cuenta ya está verificada. Inicia sesión.');
     }
 
     const otpRecord = authRepository.findOtpRecordByUserId(user.id);
@@ -495,6 +500,57 @@ class AuthService {
     auditRepository.createLog(user.id, 'password_reset_success', 'Contraseña restablecida exitosamente', ip, userAgent);
 
     return true;
+  }
+
+  /**
+   * Cambia el nombre de usuario y/o la contraseña. Exige la contraseña actual para
+   * que un token de acceso robado no baste para quedarse con la cuenta. Si cambia la
+   * contraseña, cierra las demás sesiones y devuelve un refresh token nuevo para esta.
+   */
+  async changeAccount(userId, data, ip = '', userAgent = '') {
+    const { username, currentPassword, newPassword } = data || {};
+
+    if (typeof username !== 'string' || typeof currentPassword !== 'string' || !currentPassword) {
+      throw new ValidationError('El nombre de usuario y tu contraseña actual son requeridos.');
+    }
+
+    const cleanUsername = username.trim().toLowerCase();
+    if (cleanUsername.length < 3 || cleanUsername.length > 30 || !USERNAME_REGEX.test(cleanUsername)) {
+      throw new ValidationError('El nombre de usuario debe tener entre 3 y 30 caracteres alfanuméricos, guiones bajos o puntos.');
+    }
+
+    const user = userRepository.findById(userId);
+    const valid = user && await bcrypt.compare(currentPassword, user.password_hash);
+    if (!valid) {
+      auditRepository.createLog(userId, 'account_update_failure', 'Contraseña actual incorrecta al cambiar la cuenta', ip, userAgent);
+      throw new ValidationError('Tu contraseña actual no es correcta.');
+    }
+
+    const existingUser = userRepository.findByUsername(cleanUsername);
+    if (existingUser && existingUser.id !== userId) {
+      throw new ValidationError('El nombre de usuario ya está ocupado.');
+    }
+
+    let passwordHash = null;
+    if (newPassword) {
+      authValidator.validatePassword(newPassword);
+      const rounds = Number(process.env.BCRYPT_ROUNDS) || 10;
+      passwordHash = await bcrypt.hash(newPassword, rounds);
+    }
+
+    userRepository.updateAccountDetails(userId, cleanUsername, passwordHash);
+
+    let refreshToken = null;
+    if (passwordHash) {
+      authRepository.deleteUserRefreshTokens(userId);
+      refreshToken = this.generateRefreshToken();
+      authRepository.saveRefreshToken(userId, refreshToken, Date.now() + 7 * 24 * 60 * 60 * 1000);
+      auditRepository.createLog(userId, 'password_changed', 'Contraseña cambiada; se cerraron las demás sesiones', ip, userAgent);
+    } else {
+      auditRepository.createLog(userId, 'account_updated', 'Nombre de usuario actualizado', ip, userAgent);
+    }
+
+    return { user: userRepository.findById(userId), refreshToken };
   }
 
   generateAccessToken(userId) {

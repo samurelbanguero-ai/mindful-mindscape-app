@@ -10,8 +10,25 @@ const recoverPasswordRateLimitMap = new Map();
 const chatRateLimitMap = new Map();
 const helpbotRateLimitMap = new Map();
 const apiRateLimitMap = new Map();
+const refreshRateLimitMap = new Map();
+const accountRateLimitMap = new Map();
+
+// Borra periódicamente las ventanas vencidas; sin esto los mapas crecen con cada IP
+// distinta que llega al servidor y nunca liberan memoria.
+const SWEEP_INTERVAL_MS = 10 * 60 * 1000;
+const allMaps = [];
+
+setInterval(() => {
+  const now = Date.now();
+  for (const map of allMaps) {
+    for (const [key, state] of map) {
+      if (now > state.resetAt) map.delete(key);
+    }
+  }
+}, SWEEP_INTERVAL_MS).unref();
 
 function createRateLimiter(map, limits, getClientKey) {
+  allMaps.push(map);
   return (req, res, next) => {
     const key = getClientKey(req);
     const now = Date.now();
@@ -81,6 +98,19 @@ const helpbotRateLimit = createRateLimiter(
   getIpKey
 );
 
+const refreshRateLimit = createRateLimiter(
+  refreshRateLimitMap,
+  config.rateLimits.refresh,
+  getIpKey
+);
+
+// Por usuario: frena la adivinación de la contraseña actual con un token robado
+const accountRateLimit = createRateLimiter(
+  accountRateLimitMap,
+  config.rateLimits.account,
+  (req) => req.user?.id || getIpKey(req)
+);
+
 const apiRateLimit = createRateLimiter(
   apiRateLimitMap,
   config.rateLimits.api,
@@ -96,5 +126,7 @@ module.exports = {
   recoverPasswordRateLimit,
   chatRateLimit,
   helpbotRateLimit,
+  refreshRateLimit,
+  accountRateLimit,
   apiRateLimit
 };

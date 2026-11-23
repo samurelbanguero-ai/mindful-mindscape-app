@@ -53,7 +53,7 @@ function seedAdminUser() {
   try {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@emowave.app';
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-    let adminPassword = process.env.ADMIN_PASSWORD;
+    const adminPassword = process.env.ADMIN_PASSWORD;
     const adminName = process.env.ADMIN_NAME || 'Administrador';
 
     if (!adminPassword) {
@@ -61,24 +61,33 @@ function seedAdminUser() {
       return;
     }
 
-    if (adminPassword.length < 8 || adminPassword === '123456' || adminPassword === 'admin') {
-      const crypto = require('crypto');
-      const generatedPassword = crypto.randomBytes(12).toString('base64url');
-      logger.warn(`⚠️ ADVERTENCIA DE SEGURIDAD: La contraseña de administrador en .env es demasiado corta o insegura. Por seguridad, se ha generado una contraseña aleatoria de un solo uso para esta sesión: ${generatedPassword}`);
-      adminPassword = generatedPassword;
+    if (adminPassword.length < 12 || ['123456', 'admin', 'password'].includes(adminPassword)) {
+      logger.error('ADMIN_PASSWORD es demasiado corta o insegura (mínimo 12 caracteres): no se sembró el administrador.');
+      return;
     }
 
+    // Se busca solo una cuenta que ya sea admin. Buscar también por username/email
+    // convertiría en administrador a cualquier usuario que se hubiera registrado con
+    // ese nombre o correo.
     const adminRecord = db.prepare(
-      "SELECT id FROM users WHERE role = 'admin' OR username = ? OR email = ?"
+      "SELECT id FROM users WHERE role = 'admin' ORDER BY id LIMIT 1"
+    ).get();
+
+    const conflict = db.prepare(
+      "SELECT id FROM users WHERE (username = ? OR email = ?) AND role != 'admin'"
     ).get(adminUsername, adminEmail);
+    if (conflict) {
+      logger.error(`No se sembró el administrador: el usuario o correo de ADMIN_USERNAME/ADMIN_EMAIL ya pertenece a otra cuenta (id ${conflict.id}).`);
+      return;
+    }
 
     const hash = bcrypt.hashSync(adminPassword, 10);
 
     if (adminRecord) {
+      // Mantiene el perfil del admin; solo sincroniza credenciales con el .env
       db.prepare(`
         UPDATE users
-        SET email = ?, username = ?, password_hash = ?, name = ?,
-            role = 'admin', visibility = 'publico', alias = 'Admin', profile_data = '{}', email_verified = 1
+        SET email = ?, username = ?, password_hash = ?, name = ?, email_verified = 1
         WHERE id = ?
       `).run(adminEmail, adminUsername, hash, adminName, adminRecord.id);
       logger.info('Usuario administrador actualizado en la base de datos.');

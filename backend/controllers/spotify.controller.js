@@ -31,7 +31,7 @@ class SpotifyController {
 
   async callback(req, res, next) {
     const { code, state, error } = req.query;
-    const frontendUrl = env.FRONTEND_URL;
+    const frontendUrl = env.FRONTEND_ORIGIN;
 
     if (error) {
       return res.redirect(`${frontendUrl}/spotify?spotify_connected=error&error=${encodeURIComponent(error)}`);

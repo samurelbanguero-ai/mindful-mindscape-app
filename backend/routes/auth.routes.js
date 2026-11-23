@@ -6,7 +6,8 @@ const {
   registerRateLimit,
   verifyEmailRateLimit,
   resendVerificationRateLimit,
-  recoverPasswordRateLimit
+  recoverPasswordRateLimit,
+  refreshRateLimit
 } = require('../middlewares/rate-limit.middleware');
 
 const router = express.Router();
@@ -20,7 +21,7 @@ router.post('/verify-email', verifyEmailRateLimit, authController.verifyEmail);
 router.post('/resend-verification', resendVerificationRateLimit, authController.resendVerification);
 
 // Sesión y Tokens
-router.post('/refresh-token', authController.refreshToken);
+router.post('/refresh-token', refreshRateLimit, authController.refreshToken);
 router.post('/logout', authController.logout);
 router.post('/logout-all', authMiddleware, authController.logoutAll);
 

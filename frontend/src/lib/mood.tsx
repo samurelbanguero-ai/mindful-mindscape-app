@@ -147,7 +147,7 @@ type Ctx = {
   setMood: (m: Mood) => void;
   login: (u: User, token?: string) => void;
   logout: () => void;
-  updateAccount: (username: string, password?: string) => Promise<any>;
+  updateAccount: (username: string, currentPassword: string, newPassword?: string) => Promise<any>;
 
   entries: MoodEntry[];
   addEntry: (e: MoodEntry) => void;
@@ -537,11 +537,11 @@ export function MoodProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateAccount = async (username: string, password?: string) => {
+  const updateAccount = async (username: string, currentPassword: string, newPassword?: string) => {
     if (offlineMode) {
       throw new Error("No puedes cambiar tus credenciales de cuenta en modo sin conexión.");
     }
-    const res = await api.profile.updateAccount(username, password);
+    const res = await api.profile.updateAccount(username, currentPassword, newPassword);
     if (res && res.user) {
       setUser(res.user);
       try {

@@ -49,6 +49,16 @@ module.exports = {
       max: 3,
       message: 'Has alcanzado el límite de solicitudes de recuperación de contraseña. Intenta en 1 hora.'
     },
+    refresh: {
+      windowMs: 15 * 60 * 1000, // 15 minutos
+      max: 60,
+      message: 'Demasiadas renovaciones de sesión. Intenta de nuevo en unos minutos.'
+    },
+    account: {
+      windowMs: 15 * 60 * 1000, // 15 minutos
+      max: 10,
+      message: 'Demasiados intentos de cambio de cuenta. Intenta de nuevo en 15 minutos.'
+    },
     chat: {
       windowMs: 60 * 1000, // 1 minuto
       max: 25,

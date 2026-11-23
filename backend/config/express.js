@@ -16,7 +16,9 @@ function configureExpress(app) {
   // Inyectar CORS
   app.use(cors(corsConfig));
 
-  // Parseadores de payloads JSON y URL encoded con límites de tamaño estrictos (mitigación DoS)
+  // Parseadores de payloads JSON y URL encoded con límites de tamaño estrictos (mitigación DoS).
+  // El perfil admite más porque puede traer la foto (ya reducida en el navegador).
+  app.use('/api/profile', express.json({ limit: '300kb' }));
   app.use(express.json({ limit: '50kb' }));
   app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 
@@ -30,7 +32,11 @@ function configureExpress(app) {
         if (parts.length >= 2) {
           const key = parts[0].trim();
           const val = parts.slice(1).join('=').trim();
-          req.cookies[key] = decodeURIComponent(val);
+          try {
+            req.cookies[key] = decodeURIComponent(val);
+          } catch (_) {
+            // Cookie con codificación inválida: se ignora en vez de tumbar la petición
+          }
         }
       });
     }

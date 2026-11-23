@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { LogOut, User, Lock, Moon, Sun, Palette, Shield, Eye, EyeOff } from "lucide-react";
+import { LogOut, User, Lock, Moon, Sun, Palette, Shield, Eye, EyeOff, Settings } from "lucide-react";
 
 type Theme = "light" | "dark";
 
@@ -21,6 +21,7 @@ export default function SettingsMenu() {
   // Campos de privacidad
   const [newUsername, setNewUsername] = useState(user?.username || "");
   const [newPassword, setNewPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -72,6 +73,7 @@ export default function SettingsMenu() {
     e.preventDefault();
     if (!newUsername.trim()) return toast.error("El nombre de usuario es obligatorio");
     if (newUsername.trim().length < 3) return toast.error("El nombre de usuario debe tener mínimo 3 caracteres");
+    if (!currentPassword) return toast.error("Escribe tu contraseña actual para confirmar los cambios");
     if (newPassword) {
       // Validar contraseña: mínimo 8 caracteres + mayúsculas + minúsculas + números
       if (newPassword.length < 8) return toast.error("La contraseña debe tener al menos 8 caracteres");
@@ -82,9 +84,14 @@ export default function SettingsMenu() {
 
     setSaving(true);
     try {
-      await updateAccount(newUsername.trim(), newPassword ? newPassword : undefined);
-      toast.success("Credenciales de cuenta actualizadas con éxito 🔒");
+      await updateAccount(newUsername.trim(), currentPassword, newPassword ? newPassword : undefined);
+      toast.success(
+        newPassword
+          ? "Contraseña actualizada. Cerramos tu sesión en los demás dispositivos."
+          : "Nombre de usuario actualizado.",
+      );
       setNewPassword("");
+      setCurrentPassword("");
       setModalOpen(false);
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
@@ -109,15 +116,16 @@ export default function SettingsMenu() {
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="p-2 rounded-full hover:bg-secondary/80 transition-all text-foreground/80 hover:text-foreground text-lg cursor-pointer"
+        className="w-9 h-9 grid place-items-center rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground cursor-pointer"
         aria-label="Configuración"
+        aria-expanded={open}
         title="Configuración"
       >
-        ⚙️
+        <Settings className="w-[18px] h-[18px]" />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-card border border-border shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-popover border border-border shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="p-1.5 space-y-1">
             <button
               type="button"
@@ -181,7 +189,7 @@ export default function SettingsMenu() {
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto rounded-3xl p-6 border-border bg-card">
           <DialogHeader>
             <DialogTitle className="text-xl font-serif flex items-center gap-2">
-              ⚙️ Centro de Configuración
+              Configuración
             </DialogTitle>
           </DialogHeader>
 
@@ -293,7 +301,7 @@ export default function SettingsMenu() {
                     type={showPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="8+ caracteres, mayúscula, minúscula y número"
                     disabled={offlineMode || saving}
                     className="rounded-xl pr-10"
                   />
@@ -305,6 +313,21 @@ export default function SettingsMenu() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="set-current-pw">Contraseña actual</Label>
+                <Input
+                  id="set-current-pw"
+                  type="password"
+                  autoComplete="current-password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Para confirmar que eres tú"
+                  disabled={offlineMode || saving}
+                  className="rounded-xl"
+                  required
+                />
               </div>
 
               <DialogFooter className="pt-4 gap-2">

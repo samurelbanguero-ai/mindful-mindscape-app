@@ -5,6 +5,26 @@ const ValidationError = require('../exceptions/ValidationError');
 const { sendSuccess } = require('../responses/success');
 const { sanitizeText } = require('../utils/sanitizer');
 const { toPublicProfile } = require('../shared/helpers');
+const { VALID_VISIBILITIES } = require('../shared/constants');
+const authService = require('../services/auth.service');
+const { getClientInfo } = require('../utils/request');
+const { setRefreshCookie } = require('../utils/cookies');
+const { validateAvatar, MAX_AVATAR_IMAGE_LENGTH } = require('../shared/avatar');
+
+const MAX_PROFILE_DATA_LENGTH = 20000;
+
+/** Texto opcional del perfil: null si no llegó; error si no es texto o es muy largo. */
+function optionalText(value, field, maxLength) {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== 'string') {
+    throw new ValidationError(`El campo "${field}" debe ser texto.`);
+  }
+  const trimmed = value.trim();
+  if (trimmed.length > maxLength) {
+    throw new ValidationError(`El campo "${field}" supera el límite de ${maxLength} caracteres.`);
+  }
+  return trimmed;
+}
 
 class ProfileController {
   async getProfile(req, res, next) {
@@ -24,30 +44,33 @@ class ProfileController {
 
   async updateProfile(req, res, next) {
     try {
-      const { name, bio, avatar, alias, visibility, profile_data } = req.body;
+      const { name, bio, avatar, alias, visibility, profile_data } = req.body || {};
 
-      if (bio && bio.length > 500) {
-        throw new ValidationError('El campo "bio" supera el límite de 500 caracteres.');
+      const name_ = optionalText(name, 'nombre', 80);
+      const bio_ = optionalText(bio, 'bio', 500);
+      const alias_ = optionalText(alias, 'alias', 40);
+      const avatar_ = validateAvatar(optionalText(avatar, 'avatar', MAX_AVATAR_IMAGE_LENGTH));
+
+      if (visibility !== undefined && !VALID_VISIBILITIES.includes(visibility)) {
+        throw new ValidationError('Tipo de visibilidad inválido');
       }
 
-      if (visibility) {
-        const validVisibility = ['publico', 'alias', 'anonimo'];
-        if (!validVisibility.includes(visibility)) {
-          throw new ValidationError('Tipo de visibilidad inválido');
+      let profileDataStr = null;
+      if (profile_data !== undefined && profile_data !== null) {
+        if (typeof profile_data !== 'object' || Array.isArray(profile_data)) {
+          throw new ValidationError('profile_data debe ser un objeto.');
+        }
+        profileDataStr = JSON.stringify(profile_data);
+        if (profileDataStr.length > MAX_PROFILE_DATA_LENGTH) {
+          throw new ValidationError('Las preferencias del perfil son demasiado grandes.');
         }
       }
 
-      const cleanName = name ? sanitizeText(name.trim()) : req.user.name;
-      const cleanBio = bio ? sanitizeText(bio.trim()) : req.user.bio;
-      const cleanAlias = alias ? sanitizeText(alias.trim()) : req.user.alias;
-      const cleanAvatar = avatar ? sanitizeText(avatar.trim()) : req.user.avatar;
-      const profileDataStr = profile_data ? JSON.stringify(profile_data) : null;
-
       userRepository.update(req.user.id, {
-        name: cleanName,
-        bio: cleanBio,
-        avatar: cleanAvatar,
-        alias: cleanAlias,
+        name: name_ !== null ? sanitizeText(name_) : req.user.name,
+        bio: bio_ !== null ? sanitizeText(bio_) : req.user.bio,
+        avatar: avatar_ !== null ? avatar_ : req.user.avatar,
+        alias: alias_ ? sanitizeText(alias_) : req.user.alias,
         visibility: visibility ?? req.user.visibility,
         profile_data: profileDataStr ?? req.user.profile_data
       });
@@ -66,37 +89,13 @@ class ProfileController {
 
   async updateAccount(req, res, next) {
     try {
-      const { username, password } = req.body;
+      const { ip, userAgent } = getClientInfo(req);
+      const { user, refreshToken } = await authService.changeAccount(req.user.id, req.body, ip, userAgent);
 
-      if (!username || username.trim().length < 3) {
-        throw new ValidationError('El nombre de usuario debe tener al menos 3 caracteres.');
-      }
+      // Cambió la contraseña: esta sesión sigue con un refresh token nuevo
+      if (refreshToken) setRefreshCookie(res, refreshToken);
 
-      const cleanUsername = username.trim().toLowerCase();
-      
-      const existingUser = userRepository.findByUsername(cleanUsername);
-      if (existingUser && existingUser.id !== req.user.id) {
-        throw new ValidationError('El nombre de usuario ya está ocupado.');
-      }
-
-      let passwordHash = null;
-      if (password) {
-        if (password.length < 6) {
-          throw new ValidationError('La contraseña debe tener al menos 6 caracteres de longitud.');
-        }
-        const bcrypt = require('bcryptjs');
-        passwordHash = await bcrypt.hash(password, 10);
-      }
-
-      userRepository.updateAccountDetails(req.user.id, cleanUsername, passwordHash);
-
-      const updatedUser = userRepository.findById(req.user.id);
-      const responseData = {
-        user: authDTO.toUserResponse(updatedUser).user,
-        updated: true
-      };
-
-      return sendSuccess(res, responseData, 200);
+      return sendSuccess(res, { user: authDTO.toUserResponse(user).user, updated: true }, 200);
     } catch (err) {
       next(err);
     }

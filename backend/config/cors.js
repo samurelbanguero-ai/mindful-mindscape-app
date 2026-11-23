@@ -1,26 +1,18 @@
 const env = require('./env');
 
-// Parsear múltiples orígenes desde FRONTEND_URL (separados por comas)
-const allowedOrigins = env.FRONTEND_URL
-  ? env.FRONTEND_URL.split(',').map(url => url.trim())
-  : ['http://localhost:5173', 'http://localhost:3031'];
+// Orígenes del frontend autorizados a llamar a la API con cookies (separados por comas)
+const allowedOrigins = env.FRONTEND_URL.split(',').map((url) => url.trim()).filter(Boolean);
 
 module.exports = {
-  origin: function (origin, callback) {
-    // Si no hay origen (peticiones desde Postman, curl, etc.), permitir
+  origin(origin, callback) {
+    // Sin cabecera Origin: peticiones del mismo origen (proxy de Vite), curl o health checks
     if (!origin) return callback(null, true);
 
-    // En desarrollo, permitir todos los orígenes
-    if (env.NODE_ENV === 'development') {
-      return callback(null, true);
-    }
+    // Con credentials: true, reflejar cualquier origen permitiría a otra web leer
+    // respuestas autenticadas; solo se acepta la lista blanca, también en desarrollo.
+    if (allowedOrigins.includes(origin)) return callback(null, true);
 
-    // En producción, verificar contra lista blanca
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS no permitido para este origen'));
-    }
+    return callback(null, false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

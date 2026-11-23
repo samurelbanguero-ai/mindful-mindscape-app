@@ -77,7 +77,8 @@ class PostService {
 
   async replyPost(userId, currentUserVisibility, currentUserAlias, currentUserUsername, postId, data) {
     const post = postRepository.findById(postId);
-    if (!post) {
+    // Una publicación pendiente o rechazada no es visible: tampoco se puede responder
+    if (!post || post.status !== 'approved') {
       throw new NotFoundError('Post no encontrado');
     }
 
@@ -110,7 +111,7 @@ class PostService {
 
   async reactPost(userId, postId, reaction) {
     const post = postRepository.findById(postId);
-    if (!post) {
+    if (!post || post.status !== 'approved') {
       throw new NotFoundError('Post no encontrado');
     }
 

@@ -4,6 +4,6 @@ const { DATABASE_FILE } = require('./paths');
 module.exports = {
   filename: DATABASE_FILE,
   options: {
-    verbose: env.NODE_ENV === 'development' ? console.log : null
+    verbose: env.SQL_DEBUG ? console.log : null
   }
 };

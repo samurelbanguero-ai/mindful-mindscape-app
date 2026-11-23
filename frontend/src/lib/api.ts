@@ -199,10 +199,10 @@ export const profile = {
       body: JSON.stringify(data),
     }),
 
-  updateAccount: (username: string, password?: string) =>
+  updateAccount: (username: string, currentPassword: string, newPassword?: string) =>
     apiRequest("/profile/account", {
       method: "PUT",
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, currentPassword, newPassword }),
     }),
 };
 

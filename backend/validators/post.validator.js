@@ -6,6 +6,10 @@ class PostValidator {
     const { title = '', body = '', content = '' } = data;
     const postBody = body || content;
 
+    if (typeof title !== 'string' || typeof postBody !== 'string') {
+      throw new ValidationError('El título y el contenido deben ser texto.');
+    }
+
     if (!postBody.trim()) {
       throw new ValidationError('El contenido del post es requerido');
     }
@@ -21,6 +25,10 @@ class PostValidator {
 
   validateReply(data) {
     const { content = '' } = data;
+
+    if (typeof content !== 'string') {
+      throw new ValidationError('El comentario debe ser texto.');
+    }
 
     if (!content.trim()) {
       throw new ValidationError('El comentario no puede estar vacío');
