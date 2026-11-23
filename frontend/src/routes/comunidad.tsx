@@ -11,7 +11,7 @@ import { useMood, displayAuthor, containsBadWords, MOODS, REACTIONS, type Post }
 import { formatDateTime } from "@/lib/dates";
 import { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
-import { Users, Plus, Heart, Flag, MessageCircle, Send } from "lucide-react";
+import { Plus, Heart, Flag, MessageCircle, Send } from "lucide-react";
 
 export const Route = createFileRoute("/comunidad")({
   head: () => ({
@@ -125,13 +125,11 @@ export function Comunidad() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-6 py-10 space-y-6">
-        <header className="flex items-end justify-between flex-wrap gap-4 border-b border-border/40 pb-6" aria-label="Cabecera de comunidad">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-6">
+        <header className="flex items-end justify-between flex-wrap gap-4" aria-label="Cabecera de comunidad">
           <div>
-            <p className="text-sm text-muted-foreground">Estás entre personas que te entienden</p>
-            <h1 className="text-4xl font-serif mt-1 flex items-center gap-2">
-              <Users className="w-7 h-7 text-primary" /> Comunidad
-            </h1>
+            <p className="eyebrow">Estás entre personas que te entienden</p>
+            <h1 className="text-4xl mt-2">Comunidad</h1>
           </div>
           <Button onClick={() => setCreateOpen(true)} className="rounded-full shadow-md hover:shadow-lg transition-all">
             <Plus className="w-4 h-4 mr-2" /> Compartir algo
@@ -227,7 +225,7 @@ export function Comunidad() {
 
       {/* Modal para Crear Post */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="rounded-3xl max-w-md md:max-w-lg border-0 shadow-2xl bg-card">
+        <DialogContent className="rounded-2xl max-w-md md:max-w-lg bg-card">
           <DialogHeader>
             <DialogTitle className="text-xl font-serif">Comparte con la comunidad</DialogTitle>
           </DialogHeader>
@@ -295,7 +293,7 @@ export function Comunidad() {
 
       {/* Modal para Detalles del Post */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="rounded-3xl max-w-md md:max-w-xl border-0 shadow-2xl bg-card flex flex-col h-[500px]">
+        <DialogContent className="rounded-2xl max-w-md md:max-w-xl bg-card flex flex-col h-[500px]">
           {activePost && (
             <>
               <DialogHeader>

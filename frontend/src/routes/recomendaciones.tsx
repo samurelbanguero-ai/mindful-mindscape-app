@@ -101,10 +101,10 @@ function Recos() {
   return (
     <div>
       <Navbar />
-      <main className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-8">
         <div>
-          <p className="text-sm text-muted-foreground">Hoy te sientes</p>
-          <h1 className="text-4xl font-serif mt-1">
+          <p className="eyebrow">Hoy te sientes</p>
+          <h1 className="text-4xl mt-2">
             {m.emoji} {m.label}
           </h1>
           <p className="text-muted-foreground mt-2 max-w-2xl">

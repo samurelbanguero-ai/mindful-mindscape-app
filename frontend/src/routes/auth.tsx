@@ -10,7 +10,8 @@ import { useMood, type Visibility } from "@/lib/mood";
 import { auth as authApi, getToken, setToken, clearToken } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Heart, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import { LogoMark } from "@/components/Logo";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -285,8 +286,8 @@ function Auth() {
       setResetEmail(decodeURIComponent(email));
       setMode("reset");
       window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (action === "login") {
-      setMode("login");
+    } else if (action === "login" || action === "register") {
+      setMode(action);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [location]);
@@ -466,14 +467,15 @@ function Auth() {
     <div>
       <Navbar />
       <div
-        className="min-h-[calc(100vh-4rem)] grid place-items-center px-6 py-12"
-        style={{ background: "var(--gradient-hero)" }}
+        className="min-h-[calc(100vh-4rem)] grid place-items-center px-4 sm:px-6 py-12"
+        style={{
+          background:
+            "radial-gradient(60rem 30rem at 50% -10%, oklch(from var(--primary) l c h / 0.10), transparent 70%)",
+        }}
       >
-        <Card className="w-full max-w-lg p-8 rounded-3xl border-0 shadow-2xl bg-card/95 backdrop-blur card-hover-premium transition-all duration-300">
+        <Card className="w-full max-w-md p-6 sm:p-8 rounded-2xl shadow-sm">
           <div className="text-center mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground grid place-items-center mx-auto mb-3">
-              <Heart className="w-5 h-5" fill="currentColor" />
-            </div>
+            <LogoMark className="w-11 h-11 mx-auto mb-4" />
             <h1 className="text-3xl font-serif">Tu espacio en Emowave</h1>
             <p className="text-sm text-muted-foreground mt-1">Privado, gratuito, sin juicios.</p>
           </div>

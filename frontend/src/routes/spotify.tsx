@@ -113,12 +113,10 @@ function Spot() {
   return (
     <div>
       <Navbar />
-      <main className="max-w-4xl mx-auto px-6 py-10 space-y-6">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-6">
         <div>
-          <p className="text-sm text-muted-foreground">Música para tu estado</p>
-          <h1 className="text-4xl font-serif mt-1 flex items-center gap-2">
-            <SpotifyIcon className="w-9 h-9" /> Spotify
-          </h1>
+          <p className="eyebrow">Música para tu estado</p>
+          <h1 className="text-4xl mt-2">Spotify</h1>
         </div>
 
         {!profile.spotifyConnected ? (

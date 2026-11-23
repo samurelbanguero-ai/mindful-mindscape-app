@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Mail, Instagram, Twitter, Send } from "lucide-react";
+import { Mail, Send } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -31,16 +31,19 @@ function Contacto() {
     e.preventDefault();
     if (!f.name.trim() || !f.email.trim() || !f.msg.trim())
       return toast.error("Completa todos los campos");
-    toast.success("Gracias. Te responderemos pronto 💚");
-    setF({ name: "", email: "", msg: "" });
+    // No hay servicio de envío: se abre el correo del usuario con el mensaje listo
+    const subject = encodeURIComponent(`Mensaje de ${f.name.trim()}`);
+    const body = encodeURIComponent(`${f.msg.trim()}\n\n— ${f.name.trim()} (${f.email.trim()})`);
+    window.location.href = `mailto:hola@emowave.app?subject=${subject}&body=${body}`;
+    toast.success("Abrimos tu aplicación de correo con el mensaje listo para enviar.");
   };
   return (
     <div>
       <Navbar />
-      <main className="max-w-5xl mx-auto px-6 py-12 grid md:grid-cols-2 gap-10">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 md:py-16 grid md:grid-cols-2 gap-10">
         <div>
-          <p className="text-sm uppercase tracking-widest text-primary mb-2">Contacto</p>
-          <h1 className="text-5xl font-serif mb-4">Hablemos</h1>
+          <p className="eyebrow mb-3">Contacto</p>
+          <h1 className="text-5xl mb-4">Hablemos</h1>
           <p className="text-muted-foreground mb-6">
             ¿Tienes una pregunta, idea o quieres colaborar con Emowave? Escríbenos.
           </p>
@@ -50,12 +53,6 @@ function Contacto() {
               href="mailto:hola@emowave.app"
             >
               <Mail className="w-4 h-4" /> hola@emowave.app
-            </a>
-            <a className="flex items-center gap-3 hover:text-primary transition" href="#">
-              <Instagram className="w-4 h-4" /> @emowave.bienestar
-            </a>
-            <a className="flex items-center gap-3 hover:text-primary transition" href="#">
-              <Twitter className="w-4 h-4" /> @emowaveapp
             </a>
           </div>
           <div className="mt-10">
@@ -82,42 +79,49 @@ function Contacto() {
             </Accordion>
           </div>
         </div>
-        <Card className="p-7 rounded-3xl card-premium shadow-lg">
+        <Card className="p-6 sm:p-7 self-start">
           <form onSubmit={submit} className="space-y-4">
             <div>
-              <Label htmlFor="cn" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">Nombre</Label>
+              <Label htmlFor="cn" className="block mb-1.5">
+                Nombre
+              </Label>
               <Input
                 id="cn"
                 maxLength={80}
                 value={f.name}
                 onChange={(e) => setF({ ...f, name: e.target.value })}
-                className="rounded-xl input-premium"
               />
             </div>
             <div>
-              <Label htmlFor="ce" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">Correo electrónico</Label>
+              <Label htmlFor="ce" className="block mb-1.5">
+                Correo electrónico
+              </Label>
               <Input
                 id="ce"
                 type="email"
                 maxLength={120}
                 value={f.email}
                 onChange={(e) => setF({ ...f, email: e.target.value })}
-                className="rounded-xl input-premium"
               />
             </div>
             <div>
-              <Label htmlFor="cm" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">Mensaje</Label>
+              <Label htmlFor="cm" className="block mb-1.5">
+                Mensaje
+              </Label>
               <Textarea
                 id="cm"
                 maxLength={1000}
                 value={f.msg}
-                className="min-h-[140px] rounded-xl input-premium"
+                className="min-h-[140px]"
                 onChange={(e) => setF({ ...f, msg: e.target.value })}
               />
             </div>
-            <Button type="submit" className="w-full rounded-full btn-premium-primary py-6" size="lg">
-              <Send className="w-4 h-4 mr-2" /> Enviar mensaje
+            <Button type="submit" className="w-full" size="lg">
+              <Send className="w-4 h-4" /> Escribir correo
             </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Se abrirá tu aplicación de correo con el mensaje listo.
+            </p>
           </form>
         </Card>
       </main>

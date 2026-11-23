@@ -10,7 +10,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Palette, Heart, LogOut, User as UserIcon, Sparkles, Menu } from "lucide-react";
+import { LogOut, User as UserIcon, Sparkles, Menu, ChevronDown } from "lucide-react";
+import { Logo } from "./Logo";
 import SettingsMenu from "./SettingsMenu";
 import { useState } from "react";
 
@@ -51,24 +52,24 @@ export function Navbar() {
   const activeLinks = !hasSession ? guestLinks : isPsico || isAdmin ? proLinks : userLinks;
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-background/70 border-b border-border">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-2xl bg-primary text-primary-foreground grid place-items-center shadow-sm group-hover:scale-105 transition">
-            <Heart className="w-4 h-4" fill="currentColor" />
-          </div>
-          <span className="font-serif text-xl">Emowave</span>
+    <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/70">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+        <Link to="/" className="flex items-center rounded-lg" aria-label="Emowave, inicio">
+          <Logo />
         </Link>
 
         {/* Nav desktop */}
-        <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+        <nav className="hidden md:flex items-center gap-1 text-sm" aria-label="Principal">
           {activeLinks.map((link) => (
             <Link
               key={link.label}
               to={link.to}
               hash={"hash" in link ? link.hash : undefined}
-              className="hover:text-foreground transition"
+              activeOptions={{ exact: true, includeHash: "hash" in link }}
+              className="px-3 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/70 transition-colors"
+              activeProps={{
+                className: "!text-foreground bg-secondary font-medium",
+              }}
             >
               {link.label}
             </Link>
@@ -80,11 +81,18 @@ export function Navbar() {
           {/* Selector de paleta emocional */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2">
-                <Palette className="w-4 h-4" />
-                <span className="hidden sm:inline">
-                  {current.emoji} {current.label}
-                </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 text-muted-foreground"
+                aria-label={`Paleta: ${current.label}`}
+              >
+                <span
+                  className="w-3 h-3 rounded-full bg-primary ring-2 ring-primary/20"
+                  aria-hidden="true"
+                />
+                <span className="hidden lg:inline text-foreground">{current.label}</span>
+                <ChevronDown className="w-3.5 h-3.5 opacity-60" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -111,13 +119,19 @@ export function Navbar() {
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2 flex relative rounded-full pl-2 pr-3 py-1.5">
-                    <div className="w-5.5 h-5.5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold uppercase shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 flex relative rounded-full pl-1 pr-2.5 h-9"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-primary/12 text-primary flex items-center justify-center text-xs font-semibold uppercase shrink-0">
                       {accountLabel.charAt(0)}
                     </div>
-                    <span className="max-w-[100px] truncate text-xs font-medium">{accountLabel}</span>
+                    <span className="hidden sm:inline max-w-[110px] truncate text-sm font-medium">
+                      {accountLabel}
+                    </span>
                     {supportUnreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground rounded-full text-[9px] font-bold flex items-center justify-center animate-pulse">
+                      <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground rounded-full text-[10px] font-semibold flex items-center justify-center tabular">
                         {supportUnreadCount}
                       </span>
                     )}
@@ -165,7 +179,10 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Button size="sm" onClick={() => navigate({ to: "/auth", search: { action: "login" } })}>
+              <Button
+                size="sm"
+                onClick={() => navigate({ to: "/auth", search: { action: "login" } })}
+              >
                 Entrar
               </Button>
               <SettingsMenu />

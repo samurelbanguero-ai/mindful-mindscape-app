@@ -84,19 +84,18 @@ function Perfil() {
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("La imagen es demasiado grande. El límite es de 2MB.");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("La imagen es demasiado grande. El límite es de 10 MB.");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setAvatar(event.target.result as string);
-        toast.success("Foto de fototeca cargada 📸");
-      }
-    };
-    reader.readAsDataURL(file);
+    // Se reduce a 256×256 en el navegador: el servidor solo acepta fotos pequeñas
+    resizeAvatar(file)
+      .then((dataUrl) => {
+        setAvatar(dataUrl);
+        toast.success("Foto cargada. Guarda los cambios para aplicarla.");
+      })
+      .catch(() => toast.error("No pudimos leer esa imagen. Prueba con otra."));
   };
 
   useEffect(() => {
@@ -141,10 +140,10 @@ function Perfil() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-8">
         <div>
-          <p className="text-sm text-muted-foreground">Preferencias y Apariencia</p>
-          <h1 className="text-4xl font-serif mt-1">Configuración del Perfil</h1>
+          <p className="eyebrow">Preferencias y apariencia</p>
+          <h1 className="text-4xl mt-2">Tu perfil</h1>
         </div>
 
         <form onSubmit={handleSaveProfile} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -152,7 +151,7 @@ function Perfil() {
           <div className="lg:col-span-2 space-y-6">
             <Card className="card-premium space-y-6">
               <h2 className="text-xl font-serif flex items-center gap-2 border-b border-border pb-3">
-                <User className="w-5 h-5 text-primary" /> Información Personal
+                <User className="w-5 h-5 text-primary" /> Información personal
               </h2>
 
               {/* Avatar Selector */}
@@ -165,7 +164,7 @@ function Perfil() {
                   )}
                 </div>
                 <div className="text-center sm:text-left space-y-2 flex-1">
-                  <h3 className="font-semibold text-sm">Foto de Perfil / Avatar</h3>
+                  <h3 className="font-semibold text-sm">Foto de perfil</h3>
                   <p className="text-xs text-muted-foreground">Elige un emoji zen, sube una foto de tu fototeca o introduce el enlace de una imagen.</p>
                   <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                     <Button
@@ -175,10 +174,10 @@ function Perfil() {
                       onClick={() => setAvatarModalOpen(true)}
                       className="rounded-full"
                     >
-                      Elegir Emoji Zen
+                      Elegir emoji
                     </Button>
                     <label className="inline-flex items-center justify-center h-8 px-4 rounded-full border border-input bg-background hover:bg-accent hover:text-accent-foreground text-xs font-medium cursor-pointer transition-colors">
-                      Subir de Fototeca 📸
+                      Subir foto
                       <input
                         type="file"
                         accept="image/*"
@@ -316,7 +315,7 @@ function Perfil() {
                 </div>
               </div>
               <Button type="button" variant="outline" onClick={() => navigate({ to: "/spotify" })} className="rounded-full h-9 text-xs">
-                Gestionar Conexión
+                Gestionar conexión
               </Button>
             </Card>
           </div>
@@ -325,7 +324,7 @@ function Perfil() {
           <div className="space-y-6">
             <Card className="card-premium space-y-6">
               <h2 className="text-xl font-serif flex items-center gap-2 border-b border-border pb-3">
-                <Palette className="w-5 h-5 text-primary" /> Tema y Apariencia
+                <Palette className="w-5 h-5 text-primary" /> Tema y apariencia
               </h2>
 
               {/* Selector de Mood del día */}
@@ -354,7 +353,7 @@ function Perfil() {
               <div className="border-t border-border pt-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="custom-color-toggle" className="font-medium text-sm flex items-center gap-1.5 cursor-pointer">
-                    <Sparkles className="w-4 h-4 text-primary" /> Paleta de Colores Manual
+                    <Sparkles className="w-4 h-4 text-primary" /> Color personalizado
                   </Label>
                   <input
                     id="custom-color-toggle"
@@ -410,9 +409,9 @@ function Perfil() {
             <Button
               type="submit"
               disabled={saving}
-              className="w-full rounded-full py-6 font-medium text-base shadow-lg hover:shadow-xl transition-all btn-premium-primary"
+              className="w-full h-11"
             >
-              {saving ? "Guardando..." : "Guardar Perfil y Tema"}
+              {saving ? "Guardando..." : "Guardar cambios"}
             </Button>
           </div>
         </form>
@@ -446,4 +445,40 @@ function Perfil() {
       </Dialog>
     </div>
   );
+}
+
+const AVATAR_SIZE = 256;
+
+/** Recorta la imagen al centro en un cuadrado de 256 px y la devuelve como JPEG en base64. */
+function resizeAvatar(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const side = Math.min(img.width, img.height);
+      const canvas = document.createElement("canvas");
+      canvas.width = AVATAR_SIZE;
+      canvas.height = AVATAR_SIZE;
+      const ctx = canvas.getContext("2d");
+      URL.revokeObjectURL(url);
+      if (!ctx) return reject(new Error("canvas"));
+      ctx.drawImage(
+        img,
+        (img.width - side) / 2,
+        (img.height - side) / 2,
+        side,
+        side,
+        0,
+        0,
+        AVATAR_SIZE,
+        AVATAR_SIZE,
+      );
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("imagen"));
+    };
+    img.src = url;
+  });
 }

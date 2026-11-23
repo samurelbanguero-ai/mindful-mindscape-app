@@ -49,10 +49,10 @@ function Recursos() {
   return (
     <div>
       <Navbar />
-      <main className="max-w-5xl mx-auto px-6 py-12 space-y-10">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-10">
         <div>
-          <p className="text-sm uppercase tracking-widest text-primary mb-2">Recursos gratuitos</p>
-          <h1 className="text-5xl font-serif">Apoyo cuando lo necesites</h1>
+          <p className="eyebrow mb-3">Recursos gratuitos</p>
+          <h1 className="text-5xl">Apoyo cuando lo necesites</h1>
           <p className="text-muted-foreground mt-3 max-w-2xl">
             Si estás en una situación de emergencia, contacta una línea de ayuda. Estos servicios
             son gratuitos, confidenciales y atendidos por profesionales y voluntarios.

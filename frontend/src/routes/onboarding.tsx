@@ -68,10 +68,10 @@ function Onboarding() {
   return (
     <div>
       <Navbar />
-      <main className="max-w-3xl mx-auto px-6 py-10 space-y-6">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-6">
         <div>
-          <p className="text-sm text-muted-foreground">Paso final</p>
-          <h1 className="text-4xl font-serif mt-1">Cuéntanos sobre ti</h1>
+          <p className="eyebrow">Paso final</p>
+          <h1 className="text-4xl mt-2">Cuéntanos sobre ti</h1>
           <p className="text-muted-foreground mt-2">
             Lo usaremos para sugerirte música, películas y actividades que de verdad disfrutes.
             Puedes saltarte lo que no quieras responder.

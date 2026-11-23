@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMood } from "@/lib/mood";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Palette, Plus, Trash2, Edit3, Heart, Sparkles } from "lucide-react";
+import { Plus, Trash2, Edit3, Heart, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/moodboard")({
   head: () => ({ meta: [{ title: "Mi Moodboard — Emowave" }] }),
@@ -149,12 +149,10 @@ function MoodboardView() {
   return (
     <div>
       <Navbar />
-      <main className="max-w-6xl mx-auto px-6 py-10 space-y-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-6">
         <div>
-          <p className="text-sm text-muted-foreground">Tu rincón personal</p>
-          <h1 className="text-4xl font-serif mt-1 flex items-center gap-2">
-            <Palette className="w-7 h-7 text-primary" /> Mi Tablero Decorativo
-          </h1>
+          <p className="eyebrow">Tu rincón personal</p>
+          <h1 className="text-4xl mt-2">Mi tablero</h1>
           <p className="text-muted-foreground mt-2 max-w-2xl">
             Expresa tus pensamientos visualmente de forma privada. Crea notas coloridas, adórnalas
             con stickers y colócalas en tu tablero.

@@ -203,21 +203,53 @@
   }
   html {
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   body {
-    background: var(--gradient-soft, var(--color-background));
+    /* Color plano del tema: los degradados quedan para zonas puntuales (hero) */
+    background: var(--color-background);
     color: var(--color-foreground);
     min-height: 100vh;
+    font-feature-settings: "cv11", "ss01";
     transition:
-      background-color 0.5s ease,
-      color 0.5s ease;
+      background-color 0.4s ease,
+      color 0.4s ease;
   }
   h1,
   h2,
   h3 {
     font-family: var(--font-serif);
-    letter-spacing: -0.02em;
+    font-weight: 450;
+    font-optical-sizing: auto;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
   }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: oklch(from var(--primary) l c h / 0.18);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+}
+
+/* Etiqueta pequeña sobre títulos de sección */
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+/* Números alineados en estadísticas y contadores */
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Premium Scrollbar */
@@ -281,21 +313,20 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Card Hover Premium */
+/* Tarjetas interactivas: solo cambia el borde, sin saltos de posición */
 .card-hover-premium {
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card-hover-premium:hover {
-  transform: translateY(-4px) scale(1.005);
-  box-shadow: 0 20px 40px -10px oklch(from var(--primary) l c h / 0.12);
+  border-color: oklch(from var(--primary) l c h / 0.35);
 }
 
 /* Focus glow para Inputs */
-input:focus, textarea:focus, select:focus {
+input:focus-visible, textarea:focus-visible, select:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.15) !important;
-  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.14);
+  border-color: oklch(from var(--primary) l c h / 0.7);
 }
 
 /* Sistema de Componentes Visuales Premium Unificados */
@@ -303,16 +334,11 @@ input:focus, textarea:focus, select:focus {
 .card-premium {
   background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-radius: 1.25rem; /* rounded-2xl */
+  border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 4px 20px -2px oklch(0 0 0 / 0.03);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.card-premium:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px -4px oklch(from var(--primary) l c h / 0.08);
-  border-color: oklch(from var(--primary) l c h / 0.3);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.04),
+    0 1px 1px oklch(0 0 0 / 0.02);
 }
 
 .btn-premium-primary {
@@ -324,20 +350,18 @@ input:focus, textarea:focus, select:focus {
   border-radius: 9999px;
   background: var(--color-primary);
   color: var(--color-primary-foreground);
-  box-shadow: 0 4px 14px 0 oklch(from var(--primary) l c h / 0.25);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.08);
+  transition: background-color 0.15s ease, filter 0.15s ease;
   cursor: pointer;
   border: none;
 }
 
 .btn-premium-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px 0 oklch(from var(--primary) l c h / 0.35);
-  filter: brightness(1.05);
+  filter: brightness(1.06);
 }
 
 .btn-premium-primary:active:not(:disabled) {
-  transform: translateY(0);
+  filter: brightness(0.96);
 }
 
 .btn-premium-primary:disabled {
@@ -356,12 +380,11 @@ input:focus, textarea:focus, select:focus {
   background: var(--color-secondary);
   color: var(--color-secondary-foreground);
   border: 1px solid var(--color-border);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
   cursor: pointer;
 }
 
 .btn-premium-secondary:hover:not(:disabled) {
-  transform: translateY(-1px);
   background: oklch(from var(--secondary) l c h / 0.85);
   border-color: oklch(from var(--primary) l c h / 0.3);
 }
@@ -401,16 +424,14 @@ input:focus, textarea:focus, select:focus {
 .chat-bubble-user {
   background: var(--color-primary);
   color: var(--color-primary-foreground);
-  border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
-  box-shadow: 0 4px 12px oklch(from var(--primary) l c h / 0.15);
+  border-radius: 1.125rem 1.125rem 0.375rem 1.125rem;
 }
 
 .chat-bubble-assistant {
   background: var(--color-card);
   color: var(--color-foreground);
   border: 1px solid var(--color-border);
-  border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
-  box-shadow: 0 4px 12px oklch(0 0 0 / 0.02);
+  border-radius: 1.125rem 1.125rem 1.125rem 0.375rem;
 }
 
 /* Modo oscuro unificado */
@@ -536,3 +557,12 @@ input:focus, textarea:focus, select:focus {
   animation: bloom 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

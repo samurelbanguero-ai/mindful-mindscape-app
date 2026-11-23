@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMood } from "@/lib/mood";
 import { askAssistant, type ChatMessage } from "@/lib/api";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Sparkles, Send, RotateCcw } from "lucide-react";
+import { Send, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/diario")({
   head: () => ({ meta: [{ title: "Diario con IA — Emowave" }] }),
@@ -107,15 +107,12 @@ function Diario() {
   return (
     <div>
       <Navbar />
-      <main className="max-w-3xl mx-auto px-6 py-10 space-y-4">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 md:py-10 flex flex-col gap-4 h-[calc(100dvh-4rem)]">
         {/* Header */}
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Espacio privado</p>
-            <h1 className="text-4xl font-serif mt-1 flex items-center gap-2">
-              <Sparkles className="w-7 h-7 text-primary" />
-              Diario con IA
-            </h1>
+            <p className="eyebrow">Espacio privado</p>
+            <h1 className="text-4xl mt-2">Diario con IA</h1>
           </div>
           <Button variant="outline" size="sm" onClick={resetChat} className="rounded-full">
             <RotateCcw className="w-4 h-4 mr-2" />
@@ -127,7 +124,6 @@ function Diario() {
         {sessionExpired && (
           <Card className="p-3 rounded-2xl border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-800 flex items-center justify-between gap-3 text-sm">
             <div className="flex items-start gap-3">
-              <span className="text-red-500 shrink-0 mt-0.5">🔒</span>
               <p className="text-red-700 dark:text-red-300">
                 Tu sesión expiró. Vuelve a iniciar sesión para continuar.
               </p>
@@ -141,7 +137,6 @@ function Diario() {
         {/* ✅ FIX: banner de modo offline SOLO si hay fallo real de conexión */}
         {isOffline && !sessionExpired && (
           <Card className="p-3 rounded-2xl border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 flex items-start gap-3 text-sm">
-            <span className="text-amber-500 shrink-0 mt-0.5">⚠️</span>
             <p className="text-amber-700 dark:text-amber-300">
               Sin conexión con el asistente — respuestas locales activas. Verifica que el backend
               esté corriendo.
@@ -150,8 +145,8 @@ function Diario() {
         )}
 
         {/* Chat */}
-        <Card className="card-premium flex-1 min-h-[400px] flex flex-col hover:transform-none hover:shadow-sm">
-          <div className="flex-1 space-y-4 max-h-[480px] overflow-y-auto pr-2">
+        <Card className="card-premium !p-0 flex-1 min-h-[360px] flex flex-col overflow-hidden">
+          <div className="flex-1 space-y-4 overflow-y-auto p-5 sm:p-6" aria-live="polite">
             {messages.map((m, i) => (
               <div
                 key={i}
@@ -172,7 +167,7 @@ function Diario() {
             {/* Indicador de escritura */}
             {typing && (
               <div className="flex justify-start">
-                <div className="bg-secondary px-4 py-3 rounded-2xl rounded-bl-sm">
+                <div className="chat-bubble-assistant px-4 py-3.5" aria-label="El asistente está escribiendo">
                   <div className="flex gap-1">
                     <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" />
                     <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:0.15s]" />
@@ -185,7 +180,7 @@ function Diario() {
           </div>
 
           {/* Input */}
-          <div className="mt-4 flex gap-2 items-end">
+          <div className="border-t border-border p-3 sm:p-4 flex gap-2 items-end bg-card">
             <Textarea
               value={text}
               maxLength={1500}
@@ -197,13 +192,14 @@ function Diario() {
                 }
               }}
               placeholder="Escribe lo que estás sintiendo…"
-              className="min-h-[60px] rounded-2xl resize-none"
+              className="min-h-[52px] max-h-40 rounded-xl resize-none"
+              aria-label="Escribe tu mensaje"
               disabled={typing}
             />
             <Button
               onClick={send}
               size="lg"
-              className="rounded-full h-12 w-12 p-0 shrink-0"
+              className="h-[52px] w-[52px] p-0 shrink-0 rounded-xl"
               disabled={typing || !text.trim()}
               aria-label="Enviar"
             >
@@ -212,7 +208,10 @@ function Diario() {
           </div>
 
           {/* Contador */}
-          <p className="text-xs text-muted-foreground text-right mt-1">{text.length}/1500</p>
+          <p className="text-[11px] text-muted-foreground px-4 pb-2 -mt-1 bg-card flex justify-between tabular">
+            <span>Enter para enviar · Shift + Enter para nueva línea</span>
+            <span>{text.length}/1500</span>
+          </p>
         </Card>
       </main>
     </div>

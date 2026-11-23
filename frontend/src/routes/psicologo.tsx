@@ -351,12 +351,10 @@ export function Panel() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-5" aria-label="Cabecera del panel">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4" aria-label="Cabecera del panel">
           <div>
-            <h1 className="text-3xl font-serif flex items-center gap-2">
-              <Shield className="w-7 h-7 text-primary" /> Panel Profesional
-            </h1>
+            <h1 className="text-4xl">Panel profesional</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Área de soporte terapéutico {isAdmin && "y administración del sistema"}
             </p>

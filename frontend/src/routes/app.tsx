@@ -21,7 +21,6 @@ import {
   TreePine,
   Trophy,
   BarChart2,
-  HeartHandshake,
   MessageSquare,
   Send,
   Loader2,
@@ -31,6 +30,8 @@ import {
   Play,
   Square,
   Volume2,
+  Check,
+  ArrowRight,
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
@@ -478,27 +479,29 @@ function AppPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-10 space-y-8">
         {/* Cabecera */}
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border/40 pb-6" aria-label="Sección de bienvenida">
+        <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-4" aria-label="Sección de bienvenida">
           <div>
-            <h1 className="text-3xl font-serif">
+            <p className="eyebrow mb-2 capitalize">
+              {new Date().toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long" })}
+            </p>
+            <h1 className="text-4xl">
               {user.visibility === "anonimo" ? "Bienvenido, Anónimo" : `Hola, ${user.alias || user.username}`}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">{notif}</p>
           </div>
-          <div className="flex items-center space-x-3 p-4 rounded-2xl bg-primary/5 border border-primary/10 max-w-md text-xs">
-            <span className="text-xl" role="img" aria-label="Consejo">💡</span>
-            <p className="text-foreground/80 leading-relaxed">{tip}</p>
-          </div>
+          <p className="max-w-sm text-sm text-muted-foreground leading-relaxed md:text-right border-l-2 md:border-l-0 md:border-r-2 border-primary/40 pl-3 md:pl-0 md:pr-3 italic font-serif">
+            {tip}
+          </p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Columna Izquierda: Formulario y Estadísticas */}
           <div className="lg:col-span-2 space-y-6">
             <Card className="card-premium">
-              <h2 className="text-2xl font-serif mb-6 flex items-center gap-2" id="diary-form-title">
-                <BookHeart className="w-6 h-6 text-primary" /> ¿Cómo te sientes ahora?
+              <h2 className="text-2xl mb-6" id="diary-form-title">
+                ¿Cómo te sientes ahora?
               </h2>
 
               <form onSubmit={handleEntrySubmit} className="space-y-6" aria-labelledby="diary-form-title">
@@ -508,21 +511,21 @@ function AppPage() {
                     ¿No sabes cuál es? Pasa el mouse, mantén presionada una emoción o toca{" "}
                     <span aria-hidden="true">ⓘ</span> para ver ejemplos.
                   </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-h-[220px] overflow-y-auto p-1 border border-border/60 rounded-2xl bg-secondary/20">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                     {MOODS.map((m) => (
                       <EmotionChoice
                         key={m.id}
                         emotionId={m.id}
                         selected={selectedMood === m.id}
                         onSelect={() => handleMoodSelect(m.id)}
-                        className={`w-full flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all hover:scale-102 ${
+                        className={`w-full flex flex-col items-center justify-center px-2 py-3 rounded-xl border transition-colors ${
                           selectedMood === m.id
-                            ? "border-primary bg-primary/10 text-primary-foreground font-semibold"
-                            : "border-border/40 hover:bg-secondary"
+                            ? "border-primary bg-primary/8 ring-1 ring-primary font-medium"
+                            : "border-border hover:border-foreground/20 hover:bg-secondary/60"
                         }`}
                       >
-                        <span className="text-2xl mb-1.5" role="img" aria-hidden="true">{m.emoji}</span>
-                        <span className="text-xs text-foreground">{m.label}</span>
+                        <span className="text-xl mb-1" role="img" aria-hidden="true">{m.emoji}</span>
+                        <span className="text-xs text-foreground truncate max-w-full">{m.label}</span>
                       </EmotionChoice>
                     ))}
                   </div>
@@ -549,10 +552,10 @@ function AppPage() {
                     {SITUATIONS.map((s) => (
                       <label
                         key={s}
-                        className={`flex items-center space-x-2 px-3.5 py-2 rounded-full border transition-all cursor-pointer text-xs ${
+                        className={`flex items-center gap-1.5 h-8 px-3 rounded-full border transition-colors cursor-pointer text-sm ${
                           situations.includes(s)
-                            ? "border-primary bg-primary/10 text-foreground font-medium"
-                            : "border-border hover:bg-secondary"
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
                         }`}
                       >
                         <Checkbox
@@ -560,7 +563,7 @@ function AppPage() {
                           onCheckedChange={() => toggleSituation(s)}
                           className="hidden"
                         />
-                        <span>🌿</span>
+                        {situations.includes(s) && <Check className="w-3.5 h-3.5" />}
                         <span>{s}</span>
                       </label>
                     ))}
@@ -579,72 +582,52 @@ function AppPage() {
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full rounded-full py-6 font-medium text-base shadow-lg hover:shadow-xl transition-all btn-premium"
-                  disabled={submittingEntry}
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  {submittingEntry ? "Registrando…" : "Guardar en mi diario"}
+                <Button type="submit" size="lg" className="w-full" disabled={submittingEntry}>
+                  {submittingEntry ? "Guardando…" : "Guardar en mi diario"}
                 </Button>
               </form>
             </Card>
 
             {/* Estadísticas */}
             <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Card className="card-premium flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center shrink-0">
-                    <Flame className="w-6 h-6 animate-pulse" />
+              <Card className="card-premium !p-0 grid grid-cols-3 divide-x divide-border">
+                {[
+                  { icon: Flame, value: `${streak}`, unit: streak === 1 ? "día" : "días", label: "Racha actual" },
+                  { icon: TreePine, value: `${treeLevel}`, unit: "nivel", label: "Tu árbol de calma" },
+                  { icon: Trophy, value: `${entries.length}`, unit: "", label: "Registros guardados" },
+                ].map(({ icon: Icon, value, unit, label }) => (
+                  <div key={label} className="p-4 sm:p-6">
+                    <Icon className="w-4 h-4 text-primary mb-3" aria-hidden="true" />
+                    <p className="font-serif text-3xl leading-none tabular">
+                      {value}
+                      {unit && <span className="text-sm font-sans text-muted-foreground ml-1.5">{unit}</span>}
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1.5">{label}</p>
                   </div>
-                  <div>
-                    <span className="text-2xl font-bold block">{streak} {streak === 1 ? "día" : "días"}</span>
-                    <span className="text-xs text-muted-foreground">Racha de bienestar</span>
-                  </div>
-                </Card>
-
-                <Card className="card-premium flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                    <TreePine className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <span className="text-2xl font-bold block">Nivel {treeLevel}</span>
-                    <span className="text-xs text-muted-foreground">Tu árbol de calma</span>
-                  </div>
-                </Card>
-
-                <Card className="card-premium flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center shrink-0">
-                    <Trophy className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <span className="text-2xl font-bold block">{entries.length}</span>
-                    <span className="text-xs text-muted-foreground">Registros guardados</span>
-                  </div>
-                </Card>
-              </div>
+                ))}
+              </Card>
 
               <Card className="card-premium">
                 <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
                   <div>
-                    <h3 className="text-lg font-serif flex items-center gap-1.5" id="stats-chart-title">
-                      <BarChart2 className="w-5 h-5 text-primary" /> Historial de intensidad emocional
+                    <h3 className="text-xl" id="stats-chart-title">
+                      Historial de intensidad
                     </h3>
                   </div>
 
-                  <div className="flex rounded-full bg-secondary/50 p-1 border border-border">
+                  <div className="flex rounded-lg bg-secondary/60 p-0.5 border border-border">
                     <button
                       onClick={() => setChartRange(7)}
-                      className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                        chartRange === 7 ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+                      className={`px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                        chartRange === 7 ? "bg-card text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       7 días
                     </button>
                     <button
                       onClick={() => setChartRange(30)}
-                      className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                        chartRange === 30 ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+                      className={`px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                        chartRange === 30 ? "bg-card text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       30 días
@@ -652,15 +635,17 @@ function AppPage() {
                   </div>
                 </div>
 
-                <div className="h-[250px] w-full" role="region" aria-labelledby="stats-chart-title">
+                <div className={`${entries.length === 0 ? "h-[140px]" : "h-[250px]"} w-full`} role="region" aria-labelledby="stats-chart-title">
                   {entries.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-muted-foreground text-sm">
-                      <p>No hay suficientes datos registrados todavía.</p>
+                    <div className="h-full flex flex-col items-center justify-center text-center rounded-xl border border-dashed border-border text-sm">
+                      <BarChart2 className="w-5 h-5 text-muted-foreground mb-2" aria-hidden="true" />
+                      <p className="font-medium">Aún no hay registros</p>
+                      <p className="text-muted-foreground">Tu historial aparecerá aquí después de tu primer registro.</p>
                     </div>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(var(--border), 0.1)" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
                         <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
                         <YAxis domain={[0, 10]} fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
                         <Tooltip
@@ -668,7 +653,7 @@ function AppPage() {
                             if (active && payload && payload.length) {
                               const data = payload[0].payload;
                               return (
-                                <div className="bg-card/95 border border-border p-3.5 rounded-2xl shadow-xl text-xs backdrop-blur-md">
+                                <div className="bg-card border border-border p-3 rounded-xl shadow-md text-xs">
                                   <p className="font-bold text-foreground">{data.name}</p>
                                   <p className="text-primary mt-1 font-semibold">Intensidad: <span className="font-bold">{data.Intensidad} / 10</span></p>
                                   <p className="text-muted-foreground mt-0.5">Emoción: {data.emoji} {data.label}</p>
@@ -702,31 +687,22 @@ function AppPage() {
             {(() => {
               const details = PARENT_MOOD_DETAILS[activeParentMood] || PARENT_MOOD_DETAILS.calma;
               return (
-                <Card className={`card-premium bg-gradient-to-br ${details.bg} border border-border/80 transition-all duration-500 overflow-hidden relative group`}>
-                  {/* Decorative background blur blob */}
-                  <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-primary/5 blur-xl group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
-                  
+ <Card className="card-premium overflow-hidden relative">
+
                   <div>
                     {/* Header: Title and details */}
-                    <div className="flex items-center space-x-2 mb-3.5">
-                      <div className={`w-8 h-8 rounded-lg ${details.iconBg} flex items-center justify-center font-semibold text-lg transition-transform duration-300 group-hover:scale-105 shrink-0`}>
-                        {details.emoji}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-foreground leading-tight">Espacio Calma</span>
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-wide leading-none mt-0.5">
-                          Sintonía: {details.label}
-                        </span>
-                      </div>
+                    <div className="mb-4">
+                      <h3 className="text-xl leading-tight">Espacio calma</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">En sintonía con: {details.label}</p>
                     </div>
 
                     {/* Wellness navigation tabs */}
-                    <div className="grid grid-cols-4 gap-1 p-1 bg-secondary/30 rounded-xl border border-border/40 mb-4">
+                    <div className="grid grid-cols-4 gap-0.5 p-0.5 bg-secondary/60 rounded-lg border border-border mb-5">
                       <button
                         onClick={() => setActiveTab("cita")}
-                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-lg text-[10px] font-medium transition-all cursor-pointer ${
+                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
                           activeTab === "cita"
-                            ? "bg-card text-foreground shadow-sm"
+                            ? "bg-card text-foreground shadow-xs"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                         title="Reflexión de autor"
@@ -737,9 +713,9 @@ function AppPage() {
                       
                       <button
                         onClick={() => setActiveTab("respirar")}
-                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-lg text-[10px] font-medium transition-all cursor-pointer ${
+                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
                           activeTab === "respirar"
-                            ? "bg-card text-foreground shadow-sm"
+                            ? "bg-card text-foreground shadow-xs"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                         title="Pausa de respiración"
@@ -750,9 +726,9 @@ function AppPage() {
 
                       <button
                         onClick={() => setActiveTab("musica")}
-                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-lg text-[10px] font-medium transition-all cursor-pointer ${
+                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
                           activeTab === "musica"
-                            ? "bg-card text-foreground shadow-sm"
+                            ? "bg-card text-foreground shadow-xs"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                         title="Música ambiental"
@@ -763,9 +739,9 @@ function AppPage() {
 
                       <button
                         onClick={() => setActiveTab("gratitud")}
-                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-lg text-[10px] font-medium transition-all cursor-pointer ${
+                        className={`min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
                           activeTab === "gratitud"
-                            ? "bg-card text-foreground shadow-sm"
+                            ? "bg-card text-foreground shadow-xs"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                         title="Semilla de gratitud"
@@ -807,7 +783,7 @@ function AppPage() {
 
                         {quote?.prompt && (
                           <div className="bg-primary/5 p-3 rounded-xl border border-primary/10 text-[11px] leading-relaxed">
-                            <span className="font-semibold text-primary block mb-0.5">💡 Introspección:</span>
+                            <span className="font-semibold text-primary block mb-0.5">Para reflexionar</span>
                             <p className="text-muted-foreground">{quote.prompt}</p>
                             <button
                               onClick={handlePromptReply}
@@ -961,30 +937,27 @@ function AppPage() {
             {/* Tarjeta: Apoyo profesional */}
             <Card className="card-premium flex flex-col justify-between">
               <div>
-                <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                    <HeartHandshake className="w-5 h-5" />
-                  </div>
+                <div className="flex justify-between items-start gap-3 mb-1">
+                  <h3 className="text-xl leading-tight">Apoyo profesional</h3>
                   {supportUnreadCount > 0 && (
-                    <span className="bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full font-bold">
+                    <span className="bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full font-semibold tabular shrink-0">
                       {supportUnreadCount} {supportUnreadCount === 1 ? "nuevo" : "nuevos"}
                     </span>
                   )}
                 </div>
-                <h3 className="text-lg font-semibold mb-1">Apoyo profesional</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                  ¿Te sientes abrumado/a? Puedes iniciar un chat confidencial y gratuito con un psicólogo del equipo.
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                  Si sientes que es demasiado, abre un chat confidencial y gratuito con un psicólogo del equipo.
                 </p>
               </div>
 
               <div>
                 {activeSupportRequest ? (
-                  <Button className="w-full rounded-full" variant="outline" onClick={() => setIsSupportOpen(true)}>
-                    <MessageSquare className="w-4 h-4 mr-2" /> Chat activo con psicólogo
+                  <Button className="w-full" variant="outline" onClick={() => setIsSupportOpen(true)}>
+                    <MessageSquare className="w-4 h-4" /> Abrir chat con tu psicólogo
                   </Button>
                 ) : (
-                  <Button className="w-full rounded-full" onClick={() => setIsSupportOpen(true)}>
-                    <HeartHandshake className="w-4 h-4 mr-2" /> Solicitar apoyo
+                  <Button className="w-full" onClick={() => setIsSupportOpen(true)}>
+                    Solicitar apoyo
                   </Button>
                 )}
               </div>
@@ -992,17 +965,16 @@ function AppPage() {
 
             <Card className="card-premium flex flex-col justify-between">
               <div>
-                <span className="text-2xl mb-2.5 block" role="img" aria-hidden="true">🤝</span>
-                <h3 className="text-lg font-semibold mb-1">Comunidad Emowave</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                  Comparte lo que sientes de forma 105% segura y anónima. Encuentra apoyo en personas que te comprenden sin juzgarte.
+                <h3 className="text-xl leading-tight mb-1">Comunidad</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                  Comparte lo que sientes de forma segura y anónima. Encuentra apoyo en personas que te comprenden sin juzgarte.
                 </p>
               </div>
               <Link
                 to="/comunidad"
-                className="inline-flex items-center justify-center rounded-full bg-secondary hover:bg-secondary/80 text-secondary-foreground text-xs font-semibold py-2.5 text-center transition-all w-full"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card hover:bg-secondary text-sm font-medium h-9 transition-colors w-full"
               >
-                Visitar la comunidad
+                Ir a la comunidad <ArrowRight className="w-4 h-4" />
               </Link>
             </Card>
           </div>
@@ -1011,10 +983,10 @@ function AppPage() {
 
       {/* Modal Dialog de Soporte integrado */}
       <Dialog open={isSupportOpen} onOpenChange={setIsSupportOpen}>
-        <DialogContent className="max-w-md md:max-w-lg rounded-3xl p-6 border-0 shadow-2xl bg-card">
+        <DialogContent className="max-w-md md:max-w-lg rounded-2xl p-6 bg-card">
           <DialogHeader>
-            <DialogTitle className="text-xl font-serif flex items-center gap-2">
-              <HeartHandshake className="w-5 h-5 text-primary" /> Apoyo Psicológico Profesional
+            <DialogTitle className="text-2xl font-serif">
+              Apoyo psicológico
             </DialogTitle>
           </DialogHeader>
 
