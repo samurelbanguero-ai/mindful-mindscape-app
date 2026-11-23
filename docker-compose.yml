@@ -1,0 +1,33 @@
+# Despliegue de producción: imágenes compiladas, sin servidores de desarrollo ni código montado.
+#   docker compose up -d --build
+# Para desarrollar con recarga en caliente: docker compose -f docker-compose.dev.yml up
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file:
+      - ./backend/.env
+    environment:
+      - NODE_ENV=production
+      - DATA_DIR=/data
+    volumes:
+      # Base de datos y logs persistentes, fuera del código
+      - ./data:/data
+    # Sin puerto publicado: solo el frontend (en la red interna de Docker) habla con el backend
+    expose:
+      - "3000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      - BACKEND_URL=http://backend:3000
+    ports:
+      - "3031:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

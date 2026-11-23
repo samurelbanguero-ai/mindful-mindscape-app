@@ -45,6 +45,7 @@ lerna-debug.log*
 dist/
 build/
 frontend/dist/
+frontend/.output/
 backend/dist/
 .next/
 out/

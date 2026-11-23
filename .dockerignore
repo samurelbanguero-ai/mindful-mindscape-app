@@ -1,0 +1,13 @@
+# Contexto de build de las imágenes (raíz del repositorio)
+.git
+**/node_modules
+data
+docs
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+**/__pycache__
+frontend/dist
+frontend/.output
+frontend/.vite

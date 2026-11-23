@@ -10,7 +10,10 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 // El backend siempre es alcanzable en esta URL desde el proceso de Vite
 // (dentro del contenedor: red de Docker; en local: localhost).
-const backendTarget = (process.env.VITE_API_URL || "http://localhost:3000/api").replace(/\/api\/?$/, "");
+const backendTarget = (process.env.VITE_API_URL || "http://localhost:3000/api").replace(
+  /\/api\/?$/,
+  "",
+);
 
 export default defineConfig({
   tanstackStart: {
@@ -19,13 +22,22 @@ export default defineConfig({
     },
   },
 
+  // Build de producción: servidor Node en .output/server/index.mjs (el reenvío de /api
+  // al backend lo hace src/server.ts, que además fija la IP real del cliente)
+  nitro: {
+    preset: "node-server",
+  },
+
   vite: {
     server: {
       host: "0.0.0.0",
       allowedHosts: true,
       // El catálogo de emociones vive en shared/ (raíz del repo, montado en /shared en Docker)
       fs: {
-        allow: [searchForWorkspaceRoot(process.cwd()), fileURLToPath(new URL("../shared", import.meta.url))],
+        allow: [
+          searchForWorkspaceRoot(process.cwd()),
+          fileURLToPath(new URL("../shared", import.meta.url)),
+        ],
       },
       proxy: {
         "/api": {

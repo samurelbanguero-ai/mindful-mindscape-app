@@ -24,39 +24,31 @@ mindful-mindscape-app/
 └── package.json     # Scripts raíz
 ```
 
-## 🚀 Quick Start
+## 🚀 Despliegue y desarrollo
 
-### Opción 1: Ejecutar en dos terminales (recomendado)
+Requiere Docker. Antes de nada, crea `backend/.env` a partir de `backend/.env.example`
+(con `NODE_ENV=production`, secretos JWT de 32+ caracteres y `ADMIN_PASSWORD` de 12+).
 
-**Terminal 1 - Frontend:**
+### Producción
+
 ```bash
-npm run dev:frontend
+docker compose up -d --build
 ```
 
-**Terminal 2 - Backend:**
+- La app queda en `http://<host>:3031`. El frontend es un servidor Node compilado que
+  reenvía `/api` al backend; el backend no publica ningún puerto.
+- Los contenedores corren sin root y tienen health checks; la base de datos y los logs
+  viven en `data/`.
+- Tras cambiar código o `backend/.env`, vuelve a ejecutar el mismo comando.
+
+### Desarrollo (recarga en caliente)
+
 ```bash
-npm run dev:backend
+docker compose -f docker-compose.dev.yml up
 ```
 
-Luego accede a:
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3000/api/health
-
-### Opción 2: Setup manual
-
-**Backend:**
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-**Frontend (nueva terminal):**
-```bash
-cd frontend
-npm install
-npm run dev
-```
+Usa Vite y nodemon con el código montado. El frontend queda en `http://localhost:3031`
+y el backend solo en `http://127.0.0.1:2122`.
 
 ## 📚 API Endpoints
 
