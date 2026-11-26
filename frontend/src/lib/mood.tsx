@@ -793,17 +793,25 @@ export function MoodProvider({ children }: { children: ReactNode }) {
     toast.success("Spotify desconectado");
   };
 
-  // Polling de chat de soporte cada 10 segundos
+  // Consulta el chat de soporte cada 20 segundos, solo con la pestaña visible;
+  // al volver a la pestaña se actualiza de inmediato
   useEffect(() => {
     if (offlineMode || !user) return;
 
     refreshSupport();
 
     const interval = setInterval(() => {
-      refreshSupport();
-    }, 10000);
+      if (document.visibilityState === "visible") refreshSupport();
+    }, 20000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refreshSupport();
+    };
+    document.addEventListener("visibilitychange", onVisible);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [user, offlineMode, refreshSupport]);
 
   const { streak, treeLevel } = useMemo(() => {

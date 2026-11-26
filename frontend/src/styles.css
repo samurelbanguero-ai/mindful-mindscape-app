@@ -65,6 +65,8 @@
   );
   --gradient-soft: linear-gradient(180deg, var(--background), oklch(0.96 0.03 175));
   --shadow-soft: 0 10px 40px -10px oklch(0.58 0.09 190 / 0.25);
+  /* Color primario para texto pequeño; en oscuro se aclara para mantener contraste */
+  --primary-text: var(--primary);
 }
 
 /* Calma — sereno azul-verde (menta y salvia) */
@@ -244,7 +246,12 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-primary);
+  color: var(--primary-text);
+}
+
+/* En oscuro, el texto con color primario usa la variante aclarada */
+.dark .text-primary {
+  color: var(--primary-text);
 }
 
 /* Números alineados en estadísticas y contadores */
@@ -446,6 +453,13 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   --muted-foreground: oklch(0.65 0.015 220);
   --popover: oklch(0.16 0.02 220);
   --popover-foreground: oklch(0.9 0.01 220);
+  /* Superficies secundarias derivadas del tono de la paleta activa: sin esto se
+     quedaban los valores claros de cada emoción sobre el fondo oscuro */
+  --secondary: oklch(from var(--primary) 0.22 calc(c * 0.3) h);
+  --secondary-foreground: oklch(0.9 0.01 220);
+  --accent: oklch(from var(--primary) 0.28 calc(c * 0.45) h);
+  --accent-foreground: oklch(0.94 0.01 220);
+  --primary-text: oklch(from var(--primary) 0.76 calc(c * 0.9) h);
 }
 
 /* Sobrescribir variables de color si hay color personalizado activo (Temas Dinámicos oklch) */

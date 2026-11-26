@@ -16,7 +16,9 @@ module.exports = {
   rateLimits: {
     api: {
       windowMs: 15 * 60 * 1000, // 15 minutos
-      max: 200,
+      // Por usuario con sesión (o por IP sin ella). Cubre uso intenso con varias
+      // pestañas abiertas y la consulta periódica del chat de soporte.
+      max: 900,
       message: 'Demasiadas peticiones. Por favor, intenta de nuevo en 15 minutos.'
     },
     auth: {

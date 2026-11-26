@@ -1,4 +1,6 @@
+const jwt = require('jsonwebtoken');
 const config = require('../config/security');
+const env = require('../config/env');
 const { getClientInfo } = require('../utils/request');
 
 const authRateLimitMap = new Map();
@@ -49,6 +51,24 @@ function createRateLimiter(map, limits, getClientKey) {
 }
 
 const getIpKey = (req) => getClientInfo(req).ip || 'unknown';
+
+/**
+ * Con sesión válida se cuenta por usuario; sin sesión, por IP. Contar solo por IP
+ * bloqueaba a todos los estudiantes que salen a internet con la misma IP (wifi de la
+ * universidad). Un token inválido o vencido cae en el conteo por IP.
+ */
+const getUserOrIpKey = (req) => {
+  const header = req.headers.authorization || '';
+  if (header.startsWith('Bearer ')) {
+    try {
+      const { id } = jwt.verify(header.slice(7), env.JWT_SECRET);
+      if (id) return `user:${id}`;
+    } catch (_) {
+      // token inválido: se cuenta por IP
+    }
+  }
+  return `ip:${getIpKey(req)}`;
+};
 
 const authRateLimit = createRateLimiter(
   authRateLimitMap,
@@ -114,7 +134,7 @@ const accountRateLimit = createRateLimiter(
 const apiRateLimit = createRateLimiter(
   apiRateLimitMap,
   config.rateLimits.api,
-  getIpKey
+  getUserOrIpKey
 );
 
 module.exports = {

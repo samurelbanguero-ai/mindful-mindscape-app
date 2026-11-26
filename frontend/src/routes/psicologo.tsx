@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useMood } from "@/lib/mood";
+import { MOODS, useMood } from "@/lib/mood";
 import { formatDateTime } from "@/lib/dates";
 import { AnxietyIndicator } from "@/components/AnxietyIndicator";
 import { support as supportApi, admin as adminApi, community as communityApi, type SupportRequest, type AuditLog } from "@/lib/api";
@@ -151,13 +151,15 @@ export function Panel() {
   }, [selectedReq?.messages]);
 
   // Cargar soporte
+  // En Estadísticas se cuentan todas las solicitudes; en Apoyo se aplican los filtros
   const loadRequests = async () => {
     if (!isPsico) return;
+    const unfiltered = activeTab === "stats";
     setLoadingRequests(true);
     try {
       const res = await supportApi.getAllRequests(
-        supportStatusFilter === "all" ? "" : supportStatusFilter,
-        supportSearch,
+        unfiltered || supportStatusFilter === "all" ? "" : supportStatusFilter,
+        unfiltered ? "" : supportSearch,
       );
 
       const flattened: SupportRequest[] = (res.requests || []).map((item: any) => ({
@@ -180,9 +182,12 @@ export function Panel() {
   };
 
   useEffect(() => {
-    if (!isPsico || activeTab !== "support") return;
+    if (!isPsico || (activeTab !== "support" && activeTab !== "stats")) return;
     loadRequests();
-    const interval = setInterval(loadRequests, 12000);
+    // Solo con la pestaña visible: una pestaña olvidada no debe gastar el límite de peticiones
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") loadRequests();
+    }, 15000);
     return () => clearInterval(interval);
   }, [isPsico, activeTab, supportStatusFilter, supportSearch, selectedReq]);
 
@@ -330,17 +335,16 @@ export function Panel() {
   const chartData = useMemo(() => {
     const counts: Record<string, number> = {};
     requests.forEach((r) => {
+      // Solo los casos con diario visible: los no compartidos o sin asignar no aportan datos
       if (r.journal_entries && r.journal_entries.length > 0) {
         const lastEntry = r.journal_entries[0];
-        const mood = lastEntry.mood || "indefinido";
+        const mood = MOODS.find((m) => m.id === lastEntry.mood)?.label || lastEntry.mood || "Sin definir";
         counts[mood] = (counts[mood] || 0) + 1;
-      } else {
-        counts["No compartido"] = (counts["No compartido"] || 0) + 1;
       }
     });
 
     return Object.entries(counts).map(([name, cantidad]) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
+      name,
       cantidad,
     }));
   }, [requests]);
@@ -362,14 +366,14 @@ export function Panel() {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="flex flex-wrap h-auto p-1 bg-secondary/40 rounded-full border border-border/40 w-fit max-w-full overflow-x-auto">
-            <TabsTrigger value="stats" className="rounded-full py-2 text-xs">Estadísticas</TabsTrigger>
-            <TabsTrigger value="support" className="rounded-full py-2 text-xs" onClick={loadRequests}>Apoyo Psicológico</TabsTrigger>
+          <TabsList className="flex flex-wrap h-auto p-0.5 bg-secondary/60 rounded-lg border border-border w-fit max-w-full overflow-x-auto">
+            <TabsTrigger value="stats" className="rounded-md py-1.5 px-3 text-sm">Estadísticas</TabsTrigger>
+            <TabsTrigger value="support" className="rounded-md py-1.5 px-3 text-sm">Apoyo psicológico</TabsTrigger>
             {isAdmin && (
               <>
-                <TabsTrigger value="moderation" className="rounded-full py-2 text-xs">Moderación</TabsTrigger>
-                <TabsTrigger value="accounts" className="rounded-full py-2 text-xs">Crear Cuentas</TabsTrigger>
-                <TabsTrigger value="audit" className="rounded-full py-2 text-xs">Auditoría</TabsTrigger>
+                <TabsTrigger value="moderation" className="rounded-md py-1.5 px-3 text-sm">Moderación</TabsTrigger>
+                <TabsTrigger value="accounts" className="rounded-md py-1.5 px-3 text-sm">Crear cuentas</TabsTrigger>
+                <TabsTrigger value="audit" className="rounded-md py-1.5 px-3 text-sm">Auditoría</TabsTrigger>
               </>
             )}
           </TabsList>
@@ -377,63 +381,51 @@ export function Panel() {
           {/* PESTAÑA 1: Estadísticas */}
           <TabsContent value="stats">
             <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <Card className="p-5 card-premium shadow bg-card">
-                  <div className="flex items-center space-x-3">
-                    <HeartHandshake className="w-5 h-5 text-primary" />
-                    <span className="text-xs text-muted-foreground font-medium">Total solicitudes</span>
+              <Card className="card-premium !p-0 grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-border">
+                {[
+                  { icon: HeartHandshake, label: "Total de solicitudes", value: requests.length },
+                  { icon: MessageSquare, label: "Pendientes", value: requests.filter((r) => r.status === "pending").length },
+                  { icon: Loader2, label: "En proceso", value: requests.filter((r) => r.status === "active").length },
+                  { icon: Shield, label: "Resueltas", value: requests.filter((r) => r.status === "resolved").length },
+                ].map(({ icon: Icon, label, value }) => (
+                  <div key={label} className="p-5 sm:p-6">
+                    <Icon className="w-4 h-4 text-primary mb-3" aria-hidden="true" />
+                    <p className="font-serif text-3xl leading-none tabular">{value}</p>
+                    <p className="text-sm text-muted-foreground mt-1.5">{label}</p>
                   </div>
-                  <span className="text-3xl font-bold block mt-2">{requests.length}</span>
-                </Card>
+                ))}
+              </Card>
 
-                <Card className="p-5 card-premium shadow bg-card">
-                  <div className="flex items-center space-x-3">
-                    <MessageSquare className="w-5 h-5 text-amber-500" />
-                    <span className="text-xs text-muted-foreground font-medium">Pendientes</span>
-                  </div>
-                  <span className="text-3xl font-bold block mt-2 text-amber-500">
-                    {requests.filter((r) => r.status === "pending").length}
-                  </span>
-                </Card>
-
-                <Card className="p-5 card-premium shadow bg-card">
-                  <div className="flex items-center space-x-3">
-                    <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
-                    <span className="text-xs text-muted-foreground font-medium">En proceso</span>
-                  </div>
-                  <span className="text-3xl font-bold block mt-2 text-blue-500">
-                    {requests.filter((r) => r.status === "active").length}
-                  </span>
-                </Card>
-
-                <Card className="p-5 card-premium shadow bg-card">
-                  <div className="flex items-center space-x-3">
-                    <Shield className="w-5 h-5 text-emerald-500" />
-                    <span className="text-xs text-muted-foreground font-medium">Resueltas</span>
-                  </div>
-                  <span className="text-3xl font-bold block mt-2 text-emerald-500">
-                    {requests.filter((r) => r.status === "resolved").length}
-                  </span>
-                </Card>
-              </div>
-
-              <Card className="p-6 card-premium shadow bg-card">
-                <h3 className="text-lg font-serif mb-4 flex items-center gap-1.5" id="psy-chart-title">
-                  <BarChart2 className="w-5 h-5 text-primary" /> Emociones de Pacientes
+              <Card className="card-premium">
+                <h3 className="text-xl mb-1" id="psy-chart-title">
+                  Emoción más reciente por solicitud
                 </h3>
-                <div className="h-[280px] w-full" role="region" aria-labelledby="psy-chart-title">
+                <p className="text-sm text-muted-foreground mb-5">
+                  Solo incluye tus casos con diario compartido.
+                </p>
+                <div className={`${chartData.length === 0 ? "h-[140px]" : "h-[280px]"} w-full`} role="region" aria-labelledby="psy-chart-title">
                   {chartData.length === 0 ? (
-                    <div className="h-full flex items-center justify-center text-muted-foreground text-xs">
-                      No hay suficientes datos.
+                    <div className="h-full flex flex-col items-center justify-center text-center rounded-xl border border-dashed border-border text-sm">
+                      <BarChart2 className="w-5 h-5 text-muted-foreground mb-2" aria-hidden="true" />
+                      <p className="font-medium">Aún no hay diarios compartidos</p>
+                      <p className="text-muted-foreground">Aparecerán cuando tomes casos de personas que compartieron su diario.</p>
                     </div>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(var(--border), 0.1)" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
                         <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
                         <YAxis fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
-                        <Tooltip />
-                        <Bar dataKey="cantidad" fill="var(--primary)" radius={[4, 4, 0, 0]} barSize={35} />
+                        <Tooltip
+                          cursor={{ fill: "var(--color-secondary)" }}
+                          contentStyle={{
+                            background: "var(--color-card)",
+                            border: "1px solid var(--color-border)",
+                            borderRadius: 12,
+                            fontSize: 12,
+                          }}
+                        />
+                        <Bar dataKey="cantidad" name="Solicitudes" fill="var(--color-primary)" radius={[6, 6, 0, 0]} barSize={35} />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
@@ -452,14 +444,15 @@ export function Panel() {
                     placeholder="Buscar paciente..."
                     value={supportSearch}
                     onChange={(e) => setSupportSearch(e.target.value)}
-                    className="pl-9 rounded-xl text-xs input-premium"
+                    className="pl-9"
                   />
                 </div>
 
                 <select
                   value={supportStatusFilter}
                   onChange={(e) => setSupportStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-border text-xs bg-background input-premium"
+                  aria-label="Filtrar por estado"
+                  className="w-full h-9 px-3 rounded-md border border-border text-sm bg-card"
                 >
                   <option value="pending">Pendientes</option>
                   <option value="active">En proceso</option>
@@ -468,26 +461,31 @@ export function Panel() {
                 </select>
 
                 <div className="space-y-2.5 max-h-[400px] overflow-y-auto pr-1">
+                  {requests.length === 0 && !loadingRequests && (
+                    <p className="text-sm text-muted-foreground text-center py-8 border border-dashed border-border rounded-xl">
+                      No hay solicitudes con este filtro.
+                    </p>
+                  )}
                   {requests.map((r) => (
                     <button
                       key={r.id}
                       onClick={() => setSelectedReq(r)}
-                      className={`w-full text-left p-4 rounded-2xl border transition-all ${
-                        selectedReq?.id === r.id ? "border-primary bg-primary/5 shadow-sm" : "border-border bg-card hover:bg-secondary/40"
+                      className={`w-full text-left p-4 rounded-xl border transition-colors ${
+                        selectedReq?.id === r.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border bg-card hover:border-foreground/20"
                       }`}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <span className="font-semibold text-xs text-foreground/90">
+                        <span className="font-medium text-sm">
                           {patientName(r)}
                           {isQueued(r) && (
-                            <span className="ml-1.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700">
+                            <span className="ml-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-500/12 text-amber-700 dark:text-amber-300">
                               Sin asignar
                             </span>
                           )}
                         </span>
-                        <span className="text-[10px] text-muted-foreground">{formattedDate(r.created_at)}</span>
+                        <span className="text-xs text-muted-foreground shrink-0 ml-2">{formattedDate(r.created_at)}</span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground line-clamp-2">{r.message}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{r.message}</p>
                     </button>
                   ))}
                 </div>
@@ -495,42 +493,40 @@ export function Panel() {
 
               <div className="md:col-span-2">
                 {!selectedReq ? (
-                  <Card className="h-[480px] rounded-3xl card-premium flex flex-col items-center justify-center text-muted-foreground p-6 text-center">
-                    <HeartHandshake className="w-12 h-12 text-primary/30 mb-3" />
-                    <h4 className="text-sm font-semibold">Ninguna solicitud seleccionada</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Selecciona un paciente de la lista lateral para iniciar la conversación de apoyo.</p>
+                  <Card className="h-[520px] card-premium flex flex-col items-center justify-center p-6 text-center">
+                    <HeartHandshake className="w-6 h-6 text-muted-foreground mb-3" aria-hidden="true" />
+                    <h4 className="font-medium">Ninguna solicitud seleccionada</h4>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-xs">Selecciona un paciente de la lista lateral para iniciar la conversación de apoyo.</p>
                   </Card>
                 ) : (
-                  <Card className="h-[480px] rounded-3xl card-premium flex flex-col p-5 overflow-hidden">
-                    <div className="flex justify-between items-center border-b border-border/40 pb-3 mb-3 text-xs shrink-0">
+                  <Card className="h-[520px] card-premium flex flex-col !p-5 overflow-hidden">
+                    <div className="flex justify-between items-center border-b border-border pb-3 mb-3 shrink-0">
                       <div>
-                        <span className="font-bold text-sm block text-foreground/90">
-                          Paciente: {patientName(selectedReq)}
-                        </span>
+                        <span className="font-serif text-xl block">{patientName(selectedReq)}</span>
                         {selectedReq.user_id != null && (
-                          <span className="text-[10px] text-muted-foreground">ID: {selectedReq.user_id}</span>
+                          <span className="text-xs text-muted-foreground tabular">Usuario #{selectedReq.user_id}</span>
                         )}
                       </div>
                       {selectedReq.status !== "resolved" && !isQueued(selectedReq) && (
-                        <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 text-xs rounded-full px-3" onClick={handleResolveRequest}>
+                        <Button size="sm" variant="outline" onClick={handleResolveRequest}>
                           Marcar resuelta
                         </Button>
                       )}
                     </div>
 
                     <div className="flex-1 overflow-y-auto space-y-4 pr-1.5 scrollbar-thin">
-                      <div className="bg-primary/5 border border-primary/10 rounded-2xl p-3.5 text-xs text-foreground/80 leading-relaxed">
-                        <span className="font-semibold block mb-0.5 text-primary">Motivo de consulta:</span>
+                      <div className="bg-secondary/60 border border-border rounded-xl p-3.5 text-sm leading-relaxed">
+                        <span className="font-medium block mb-1 text-xs text-muted-foreground uppercase tracking-wide">Motivo de consulta</span>
                         {selectedReq.message}
                       </div>
 
                       {isQueued(selectedReq) && (
-                        <div className="border border-amber-500/20 bg-amber-500/5 rounded-2xl p-4 text-xs space-y-3">
-                          <p className="text-foreground/80">
+                        <div className="border border-border rounded-xl p-4 text-sm space-y-3">
+                          <p className="text-muted-foreground">
                             Este caso todavía no tiene psicólogo asignado. Al tomarlo quedará a tu cargo y podrás ver la
                             conversación{selectedReq.share_journal === 1 ? " y el diario que el estudiante compartió" : ""}.
                           </p>
-                          <Button size="sm" className="rounded-full" onClick={handleClaimRequest}>
+                          <Button size="sm" onClick={handleClaimRequest}>
                             Tomar caso
                           </Button>
                         </div>
@@ -541,12 +537,14 @@ export function Panel() {
                       )}
 
                       {selectedReq.share_journal === 1 && selectedReq.journal_entries && selectedReq.journal_entries.length > 0 && (
-                        <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-3.5 text-xs space-y-2">
-                          <span className="font-semibold text-emerald-600 block">🌿 Diario de emociones compartido:</span>
+                        <div className="border border-border rounded-xl p-3.5 text-sm space-y-2">
+                          <span className="font-medium block text-xs text-muted-foreground uppercase tracking-wide">Diario compartido</span>
                           {selectedReq.journal_entries.map((entry, idx) => (
-                            <div key={idx} className="border-b border-border/30 pb-2 last:border-0 text-foreground/80">
-                              <p className="text-[10px] text-muted-foreground">{entry.date} - {entry.mood} ({entry.intensity}/10)</p>
-                              {entry.note && <p className="italic mt-0.5">"{entry.note}"</p>}
+                            <div key={idx} className="border-b border-border pb-2 last:border-0">
+                              <p className="text-xs text-muted-foreground tabular">
+                                {entry.date} · {MOODS.find((m) => m.id === entry.mood)?.label || entry.mood} · {entry.intensity}/10
+                              </p>
+                              {entry.note && <p className="mt-0.5">«{entry.note}»</p>}
                             </div>
                           ))}
                         </div>
@@ -557,8 +555,8 @@ export function Panel() {
                           const isMe = m.sender_id === user.id;
                           return (
                             <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                              <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-xs ${isMe ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-secondary text-foreground rounded-tl-none border"}`}>
-                                {!isMe && <span className="font-bold block text-[10px] text-primary/80 mb-0.5">Paciente</span>}
+                              <div className={`max-w-[80%] px-4 py-2.5 text-sm leading-relaxed ${isMe ? "chat-bubble-user" : "chat-bubble-assistant"}`}>
+                                {!isMe && <span className="font-medium block text-xs text-primary mb-0.5">Paciente</span>}
                                 <p>{m.message}</p>
                               </div>
                             </div>
@@ -575,14 +573,15 @@ export function Panel() {
                           placeholder="Escribe un mensaje..."
                           value={chatInput}
                           onChange={(e) => setChatInput(e.target.value)}
-                          className="flex-1 px-4 py-2.5 rounded-full border text-xs focus:outline-none focus:ring-1 focus:ring-primary bg-background input-premium"
+                          aria-label="Mensaje para el paciente"
+                          className="flex-1 h-10 px-3.5 rounded-lg border border-border text-sm bg-card"
                         />
-                        <Button type="submit" size="icon" className="rounded-full h-9 w-9 shrink-0 btn-premium-primary">
-                          <Send className="w-3.5 h-3.5" />
+                        <Button type="submit" size="icon" className="h-10 w-10 shrink-0" aria-label="Enviar">
+                          <Send className="w-4 h-4" />
                         </Button>
                       </form>
                     ) : (
-                      <div className="mt-4 p-3 bg-secondary/40 text-center text-xs text-muted-foreground rounded-xl shrink-0">
+                      <div className="mt-4 p-3 bg-secondary/60 text-center text-sm text-muted-foreground rounded-lg shrink-0">
                         Consulta cerrada.
                       </div>
                     )}
@@ -599,10 +598,10 @@ export function Panel() {
                 <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
                   <div className="relative w-full sm:max-w-xs">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input placeholder="Buscar..." value={postSearch} onChange={(e) => setPostSearch(e.target.value)} className="pl-9 text-xs input-premium" />
+                    <Input placeholder="Buscar..." value={postSearch} onChange={(e) => setPostSearch(e.target.value)} className="pl-9" />
                   </div>
 
-                  <select value={postStatusFilter} onChange={(e) => setPostStatusFilter(e.target.value)} className="px-3.5 py-1.5 rounded-xl border text-xs bg-background input-premium">
+                  <select value={postStatusFilter} onChange={(e) => setPostStatusFilter(e.target.value)} className="h-9 px-3 rounded-md border border-border text-sm bg-card">
                     <option value="">Todos los estados</option>
                     <option value="pending">Pendientes</option>
                     <option value="approved">Aprobados</option>
@@ -684,7 +683,7 @@ export function Panel() {
                         value={createName}
                         onChange={(e) => setCreateName(e.target.value)}
                         placeholder="Ej: Dr. Alejandro Sanz"
-                        className="rounded-xl input-premium"
+                       
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -694,7 +693,7 @@ export function Panel() {
                         value={createUsername}
                         onChange={(e) => setCreateUsername(e.target.value)}
                         placeholder="Ej: alejandrosanz"
-                        className="rounded-xl input-premium"
+                       
                         required
                       />
                     </div>
@@ -709,7 +708,7 @@ export function Panel() {
                         value={createEmail}
                         onChange={(e) => setCreateEmail(e.target.value)}
                         placeholder="Ej: alejandro@emowave.app"
-                        className="rounded-xl input-premium"
+                       
                         required
                       />
                     </div>
@@ -721,7 +720,7 @@ export function Panel() {
                         value={createPassword}
                         onChange={(e) => setCreatePassword(e.target.value)}
                         placeholder="Mínimo 6 caracteres"
-                        className="rounded-xl input-premium"
+                       
                         required
                       />
                     </div>
@@ -733,7 +732,7 @@ export function Panel() {
                       id="c-role"
                       value={createRole}
                       onChange={(e) => setCreateRole(e.target.value as "usuario" | "psicologo")}
-                      className="w-full px-3 py-2 rounded-xl border border-border text-xs bg-background input-premium"
+                      className="w-full h-9 px-3 rounded-md border border-border text-sm bg-card"
                     >
                       <option value="usuario">Estudiante</option>
                       <option value="psicologo">Psicólogo/a del equipo</option>
